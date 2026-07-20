@@ -1,0 +1,284 @@
+// Hive — Community Operating System
+// Prisma Schema v1.0 (Phase 2)
+// Database: PostgreSQL via Supabase
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  MEMBER
+  ORGANIZER
+  ADMIN
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+enum RegistrationStatus {
+  REGISTERED
+  WAITLISTED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+}
+
+enum OpportunityType {
+  HACKATHON
+  INTERNSHIP
+  OPEN_SOURCE
+  VOLUNTEER
+}
+
+enum BadgeTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+// ─── Core Models ──────────────────────────────────────────────────────────────
+
+/// Maps 1:1 to the Supabase Auth user. Stores app-level profile data.
+model User {
+  id        String   @id @default(uuid())
+  /// Must match auth.users.id in Supabase
+  authId    String   @unique
+  email     String   @unique
+  fullName  String
+  username  String   @unique
+  avatarUrl String?
+  bio       String?
+  role      UserRole @default(MEMBER)
+
+  // Social links
+  githubUrl    String?
+  linkedinUrl  String?
+  portfolioUrl String?
+
+  // Skills & Interests (stored as arrays for simplicity at MVP scale)
+  skills   String[]
+  interests String[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  memberships        Membership[]
+  createdEvents      Event[]             @relation("EventOrganizer")
+  registrations      Registration[]
+  attendanceRecords  Attendance[]
+  communityScores    CommunityScore[]
+  earnedBadges       UserBadge[]
+  announcements      Announcement[]
+
+  @@index([authId])
+  @@index([username])
+  @@map("users")
+}
+
+/// A developer community (e.g. "Google Developer Groups – Campus")
+model Community {
+  id          String  @id @default(uuid())
+  name        String
+  slug        String  @unique
+  description String?
+  logoUrl     String?
+  bannerUrl   String?
+  website     String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  memberships   Membership[]
+  events        Event[]
+  announcements Announcement[]
+  scores        CommunityScore[]
+
+  @@index([slug])
+  @@map("communities")
+}
+
+/// Join table: User ↔ Community with role context
+model Membership {
+  id          String           @id @default(uuid())
+  userId      String
+  communityId String
+  role        UserRole         @default(MEMBER)
+  status      MembershipStatus @default(ACTIVE)
+  joinedAt    DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityId])
+  @@index([communityId])
+  @@map("memberships")
+}
+
+// ─── Events ───────────────────────────────────────────────────────────────────
+
+model Event {
+  id          String      @id @default(uuid())
+  communityId String
+  organizerId String
+  title       String
+  slug        String      @unique
+  description String?
+  coverUrl    String?
+  location    String?
+  isOnline    Boolean     @default(false)
+  meetLink    String?
+
+  status       EventStatus @default(DRAFT)
+  startAt      DateTime
+  endAt        DateTime
+  capacity     Int?
+  // QR code token for attendance scanning
+  qrToken      String      @unique @default(uuid())
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  community     Community      @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  organizer     User           @relation("EventOrganizer", fields: [organizerId], references: [id])
+  registrations Registration[]
+  attendance    Attendance[]
+
+  @@index([communityId])
+  @@index([status])
+  @@index([startAt])
+  @@map("events")
+}
+
+/// Member signs up for an event
+model Registration {
+  id      String             @id @default(uuid())
+  userId  String
+  eventId String
+  status  RegistrationStatus @default(REGISTERED)
+
+  registeredAt DateTime  @default(now())
+  cancelledAt  DateTime?
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+  @@map("registrations")
+}
+
+/// Attendance record after QR scan at the event door
+model Attendance {
+  id      String           @id @default(uuid())
+  userId  String
+  eventId String
+  status  AttendanceStatus @default(PRESENT)
+  scannedAt DateTime       @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+  @@map("attendance")
+}
+
+// ─── Community Score Engine ────────────────────────────────────────────────────
+
+/// Point log for the community score engine
+model CommunityScore {
+  id          String  @id @default(uuid())
+  userId      String
+  communityId String
+  action      String  // e.g. "ATTEND_EVENT", "HOST_SESSION", etc.
+  points      Int
+  refId       String? // Optional reference ID (eventId, opportunityId, etc.)
+  note        String?
+
+  createdAt DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@index([userId, communityId])
+  @@map("community_scores")
+}
+
+// ─── Gamification ─────────────────────────────────────────────────────────────
+
+model Badge {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String
+  iconUrl     String?
+  tier        BadgeTier @default(BRONZE)
+  pointValue  Int       @default(0)
+
+  createdAt DateTime    @default(now())
+  earnedBy  UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id       String   @id @default(uuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@map("user_badges")
+}
+
+// ─── Community Content ────────────────────────────────────────────────────────
+
+model Announcement {
+  id          String  @id @default(uuid())
+  communityId String
+  authorId    String
+  title       String
+  content     String
+  isPinned    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id])
+
+  @@index([communityId])
+  @@map("announcements")
+}
