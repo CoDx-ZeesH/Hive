@@ -1,43 +1,58 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { Sidebar } from "@/components/hive/sidebar";
+import { TopBar } from "@/components/hive/top-bar";
+import type { UserRole } from "@/types";
+
 /**
- * Dashboard route group layout.
- * Sidebar + main content shell — Phase 3 will implement the full layout.
+ * Dashboard Layout — Server Component.
+ *
+ * Fetches the authenticated user from Supabase on the server,
+ * then renders the sidebar and topbar shells around the page content.
+ * The proxy (middleware) already guards this route — this is a second
+ * server-side check as a defence-in-depth measure.
  */
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-dvh flex" style={{ background: "var(--hive-surface)" }}>
-      {/* Sidebar placeholder */}
-      <aside
-        className="w-60 border-r flex-shrink-0 p-4 hidden md:flex flex-col"
-        style={{ background: "#fff", borderColor: "var(--hive-border)" }}
-      >
-        <div
-          className="flex items-center gap-2 mb-8 px-2"
-          style={{ fontFamily: "var(--font-mono)" }}
-        >
-          <div
-            className="w-6 h-6 rounded flex items-center justify-center text-white text-xs font-bold"
-            style={{ background: "var(--hive-primary)" }}
-          >
-            H
-          </div>
-          <span className="text-sm font-bold" style={{ color: "var(--hive-text)" }}>
-            HIVE
-          </span>
-        </div>
-        <p
-          className="text-xs px-2"
-          style={{ fontFamily: "var(--font-mono)", color: "var(--hive-muted)" }}
-        >
-          SIDEBAR_PHASE_3
-        </p>
-      </aside>
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-      {/* Main content */}
-      <main className="flex-1 overflow-auto p-6 md:p-8">{children}</main>
+  if (!user) {
+    redirect("/login");
+  }
+
+  // Build a safe user object from Supabase metadata
+  const dashboardUser = {
+    fullName:
+      (user.user_metadata?.full_name as string | undefined) ??
+      user.email?.split("@")[0] ??
+      "Member",
+    email: user.email ?? "",
+    role: ((user.user_metadata?.role as string | undefined) ??
+      "MEMBER") as UserRole,
+    avatarUrl:
+      (user.user_metadata?.avatar_url as string | undefined) ?? null,
+  };
+
+  return (
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--hive-surface)" }}>
+      {/* Sidebar — hidden on mobile, visible md+ */}
+      <Sidebar user={dashboardUser} />
+
+      {/* Main area */}
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+        <TopBar user={dashboardUser} />
+
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 animate-fade-in">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

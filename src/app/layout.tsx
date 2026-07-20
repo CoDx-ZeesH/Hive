@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Geist } from "next/font/google";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -103,7 +104,9 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
         />
       </head>
       <body className="min-h-dvh flex flex-col antialiased">
-        {children}
+        <TooltipProvider delay={300}>
+          {children}
+        </TooltipProvider>
       </body>
     </html>
   );
