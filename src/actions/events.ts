@@ -22,7 +22,7 @@ import {
   isEventUpcoming,
 } from "@/lib/events/utils";
 import type { ActionResult } from "@/types";
-import type { EventStatus, RegistrationStatus } from "@prisma/client";
+import type { EventStatus, RegistrationStatus } from "@/generated/prisma/client";
 
 /* ─── Shared Types ─────────────────────────────────────────────────────────── */
 

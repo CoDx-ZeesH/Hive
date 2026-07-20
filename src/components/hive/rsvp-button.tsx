@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { rsvpForEvent } from "@/actions/events";
-import type { RegistrationStatus } from "@prisma/client";
+import type { RegistrationStatus } from "@/generated/prisma/client";
 
 interface RsvpButtonProps {
   eventId: string;
