@@ -1,16 +1,5 @@
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  CalendarDays,
-  Users,
-  Trophy,
-  Megaphone,
-  Briefcase,
-  BarChart2,
-  Settings,
-  ShieldCheck,
-  UserCog,
-} from "lucide-react";
+
 import { SidebarNav } from "@/components/hive/sidebar-nav";
 import { UserAvatar } from "@/components/hive/user-avatar";
 import { logoutAction } from "@/actions/auth";
@@ -32,11 +21,11 @@ interface SidebarProps {
 const memberNav = [
   {
     items: [
-      { label: "Dashboard", href: "/member", icon: LayoutDashboard },
-      { label: "Events", href: "/member/events", icon: CalendarDays },
-      { label: "Community", href: "/member/community", icon: Users },
-      { label: "Opportunities", href: "/member/opportunities", icon: Briefcase },
-      { label: "Leaderboard", href: "/member/leaderboard", icon: Trophy },
+      { label: "Dashboard", href: "/member", icon: "dashboard" },
+      { label: "Events", href: "/member/events", icon: "calendar" },
+      { label: "Community", href: "/member/community", icon: "users" },
+      { label: "Opportunities", href: "/member/opportunities", icon: "briefcase" },
+      { label: "Leaderboard", href: "/member/leaderboard", icon: "trophy" },
     ],
   },
 ];
@@ -45,16 +34,16 @@ const organizerNav = [
   {
     title: "OVERVIEW",
     items: [
-      { label: "Dashboard", href: "/organizer", icon: LayoutDashboard },
-      { label: "Events", href: "/organizer/events", icon: CalendarDays },
-      { label: "Members", href: "/organizer/members", icon: Users },
-      { label: "Announcements", href: "/organizer/announcements", icon: Megaphone },
+      { label: "Dashboard", href: "/organizer", icon: "dashboard" },
+      { label: "Events", href: "/organizer/events", icon: "calendar" },
+      { label: "Members", href: "/organizer/members", icon: "users" },
+      { label: "Announcements", href: "/organizer/announcements", icon: "megaphone" },
     ],
   },
   {
     title: "INSIGHTS",
     items: [
-      { label: "Analytics", href: "/organizer/analytics", icon: BarChart2 },
+      { label: "Analytics", href: "/organizer/analytics", icon: "analytics" },
     ],
   },
 ];
@@ -63,17 +52,17 @@ const adminNav = [
   {
     title: "MANAGEMENT",
     items: [
-      { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-      { label: "Members", href: "/admin/members", icon: UserCog },
-      { label: "Communities", href: "/admin/communities", icon: ShieldCheck },
-      { label: "Events", href: "/admin/events", icon: CalendarDays },
+      { label: "Dashboard", href: "/admin", icon: "dashboard" },
+      { label: "Members", href: "/admin/members", icon: "userCog" },
+      { label: "Communities", href: "/admin/communities", icon: "shieldCheck" },
+      { label: "Events", href: "/admin/events", icon: "calendar" },
     ],
   },
   {
     title: "SYSTEM",
     items: [
-      { label: "Analytics", href: "/admin/analytics", icon: BarChart2 },
-      { label: "Settings", href: "/admin/settings", icon: Settings },
+      { label: "Analytics", href: "/admin/analytics", icon: "analytics" },
+      { label: "Settings", href: "/admin/settings", icon: "settings" },
     ],
   },
 ];
