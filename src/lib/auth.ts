@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import type { UserRole } from "@/types";
-import type { User } from "@prisma/client";
+import type { User } from "@/generated/prisma/client";
 
 /**
  * Resolves the Supabase auth session user (or null).
