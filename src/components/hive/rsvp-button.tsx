@@ -1,111 +1,110 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { rsvpForEvent } from "@/actions/events";
-import type { RegistrationStatus } from "@/generated/prisma/client";
+import { useTransition } from "react";
+import { rsvpAction, cancelRsvpAction } from "@/actions/events";
+import { CalendarCheck, X } from "lucide-react";
 
 interface RsvpButtonProps {
   eventId: string;
-  registrationStatus: RegistrationStatus | null;
-  disabled?: boolean;
+  isRegistered: boolean;
+  isWaitlisted?: boolean;
+  eventStatus: string;
 }
 
 /**
- * RsvpButton — client component for event registration.
+ * RsvpButton — Client Component.
+ * Calls rsvpAction / cancelRsvpAction via useTransition for
+ * smooth pending-state UI without useActionState.
  */
 export function RsvpButton({
   eventId,
-  registrationStatus,
-  disabled = false,
+  isRegistered,
+  isWaitlisted = false,
+  eventStatus,
 }: RsvpButtonProps) {
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<string | null>(null);
 
-  const isRegistered = registrationStatus === "REGISTERED";
-  const isWaitlisted = registrationStatus === "WAITLISTED";
-
-  function handleRsvp() {
+  const handleRsvp = () => {
     startTransition(async () => {
-      const result = await rsvpForEvent(eventId);
-      if (result.success) {
-        setMessage(result.message ?? "Registered!");
-      } else {
-        setMessage(result.error);
+      const res = await rsvpAction(eventId);
+      if (!res.success && res.message) {
+        alert(res.message);
       }
     });
-  }
+  };
 
-  if (isRegistered) {
+  const handleCancel = () => {
+    if (!confirm("Cancel your RSVP for this event?")) return;
+    startTransition(async () => {
+      await cancelRsvpAction(eventId);
+    });
+  };
+
+  if (eventStatus !== "PUBLISHED") {
     return (
-      <div className="flex flex-col gap-2">
-        <button
-          type="button"
-          disabled
-          className="hive-btn w-full py-4 text-sm cursor-default"
-          style={{
-            background: "var(--hive-success)",
-            color: "#fff",
-            opacity: 0.9,
-          }}
-        >
-          REGISTERED ✓
-        </button>
-        {message && <StatusMessage message={message} />}
-      </div>
-    );
-  }
-
-  if (isWaitlisted) {
-    return (
-      <div className="flex flex-col gap-2">
-        <button
-          type="button"
-          disabled
-          className="hive-btn w-full py-4 text-sm cursor-default"
-          style={{
-            background: "var(--hive-warning)",
-            color: "#fff",
-            opacity: 0.9,
-          }}
-        >
-          WAITLISTED
-        </button>
-        {message && <StatusMessage message={message} />}
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-2">
-      <button
-        type="button"
-        onClick={handleRsvp}
-        disabled={disabled || isPending}
-        className="hive-btn w-full py-4 text-sm text-white"
+      <span
+        className="hive-badge text-xs px-4 py-2"
         style={{
-          background: disabled
-            ? "var(--hive-muted)"
-            : isPending
-              ? "var(--hive-primary-hover)"
-              : "var(--hive-primary)",
-          cursor: disabled || isPending ? "not-allowed" : "pointer",
-          opacity: disabled ? 0.6 : isPending ? 0.85 : 1,
+          color: "var(--hive-muted)",
+          background: "var(--hive-surface)",
+          borderColor: "var(--hive-border)",
         }}
       >
-        {isPending ? "REGISTERING..." : "RSVP_NOW"}
-      </button>
-      {message && <StatusMessage message={message} />}
-    </div>
-  );
-}
+        REGISTRATION_CLOSED
+      </span>
+    );
+  }
 
-function StatusMessage({ message }: { message: string }) {
+  if (isRegistered || isWaitlisted) {
+    return (
+      <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
+          style={{
+            background: isWaitlisted ? "#fef3c7" : "#f0fdf4",
+            color: isWaitlisted ? "#d97706" : "var(--hive-success)",
+            fontFamily: "var(--font-mono)",
+          }}
+        >
+          <CalendarCheck size={15} strokeWidth={2} />
+          {isWaitlisted ? "WAITLISTED" : "REGISTERED"}
+        </div>
+        <button
+          type="button"
+          onClick={handleCancel}
+          disabled={isPending}
+          className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors hover:bg-[var(--hive-surface)]"
+          style={{
+            color: "var(--hive-muted)",
+            fontFamily: "var(--font-mono)",
+            border: "1px solid var(--hive-border)",
+            cursor: isPending ? "not-allowed" : "pointer",
+            opacity: isPending ? 0.6 : 1,
+          }}
+          aria-label="Cancel RSVP"
+        >
+          <X size={13} />
+          CANCEL
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <p
-      className="text-xs text-center"
-      style={{ color: "var(--hive-muted)", fontFamily: "var(--font-mono)" }}
+    <button
+      type="button"
+      onClick={handleRsvp}
+      disabled={isPending}
+      id="rsvp-btn"
+      className="hive-btn px-6 py-3 text-sm text-white flex items-center gap-2"
+      style={{
+        background: isPending ? "var(--hive-primary-hover)" : "var(--hive-primary)",
+        cursor: isPending ? "not-allowed" : "pointer",
+        opacity: isPending ? 0.8 : 1,
+      }}
     >
-      {message}
-    </p>
+      <CalendarCheck size={15} strokeWidth={2} />
+      {isPending ? "REGISTERING..." : "RSVP_NOW"}
+    </button>
   );
 }

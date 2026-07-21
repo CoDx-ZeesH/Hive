@@ -1,450 +1,244 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
-import {
-  getCurrentDbUser,
-  requireDbUser,
-  requireOrganizer,
-  hasRole,
-} from "@/lib/auth";
-import {
-  createEventSchema,
-  rsvpSchema,
-  type EventFormState,
-} from "@/lib/validations/events";
-import {
-  embedCategoryInDescription,
-  extractCategoryFromDescription,
-  stripCategoryFromDescription,
-  generateEventSlug,
-  isEventUpcoming,
-} from "@/lib/events/utils";
-import type { ActionResult } from "@/types";
-import type { EventStatus, RegistrationStatus } from "@/generated/prisma/client";
+import { createEventSchema } from "@/lib/validations/event";
+import type { EventFormState } from "@/lib/validations/event";
 
-/* ─── Shared Types ─────────────────────────────────────────────────────────── */
+/* ─── Helper: get current DB user ──────────────────────────────────────────── */
 
-export interface EventListItem {
-  id: string;
-  slug: string;
-  title: string;
-  description: string | null;
-  category: string;
-  startAt: Date;
-  endAt: Date;
-  location: string | null;
-  isOnline: boolean;
-  meetLink: string | null;
-  status: EventStatus;
-  coverUrl: string | null;
-  capacity: number | null;
-  registrationCount: number;
-  isUpcoming: boolean;
-  community: {
-    id: string;
-    name: string;
-    slug: string;
-  };
-  organizer: {
-    id: string;
-    fullName: string;
-  };
+async function getDbUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+  if (!dbUser) throw new Error("User profile not found");
+  return dbUser;
 }
 
-export interface EventDetail extends EventListItem {
-  qrToken: string;
-  userRegistration: {
-    id: string;
-    status: RegistrationStatus;
-  } | null;
-}
-
-/* ─── Helpers ────────────────────────────────────────────────────────────────── */
-
-function mapEventToListItem(
-  event: {
-    id: string;
-    slug: string;
-    title: string;
-    description: string | null;
-    startAt: Date;
-    endAt: Date;
-    location: string | null;
-    isOnline: boolean;
-    meetLink: string | null;
-    status: EventStatus;
-    coverUrl: string | null;
-    capacity: number | null;
-    community: { id: string; name: string; slug: string };
-    organizer: { id: string; fullName: string };
-    _count: { registrations: number };
-  },
-  now = new Date()
-): EventListItem {
-  return {
-    id: event.id,
-    slug: event.slug,
-    title: event.title,
-    description: stripCategoryFromDescription(event.description),
-    category: extractCategoryFromDescription(event.description),
-    startAt: event.startAt,
-    endAt: event.endAt,
-    location: event.location,
-    isOnline: event.isOnline,
-    meetLink: event.meetLink,
-    status: event.status,
-    coverUrl: event.coverUrl,
-    capacity: event.capacity,
-    registrationCount: event._count.registrations,
-    isUpcoming: isEventUpcoming(event.startAt, now),
-    community: event.community,
-    organizer: event.organizer,
-  };
-}
-
-async function getOrganizerCommunities(userId: string, role: string) {
-  if (role === "ADMIN") {
-    return prisma.community.findMany({
-      orderBy: { name: "asc" },
-      select: { id: true, name: true, slug: true },
-    });
-  }
-
-  const memberships = await prisma.membership.findMany({
-    where: {
-      userId,
-      status: "ACTIVE",
-      role: { in: ["ORGANIZER", "ADMIN"] },
-    },
-    include: {
-      community: {
-        select: { id: true, name: true, slug: true },
-      },
-    },
-  });
-
-  return memberships.map((m) => m.community);
-}
-
-/* ─── Create Event ─────────────────────────────────────────────────────────── */
+/* ─── Create Event ────────────────────────────────────────────────────────── */
 
 export async function createEventAction(
   _state: EventFormState,
   formData: FormData
 ): Promise<EventFormState> {
-  let organizer;
-  try {
-    organizer = await requireOrganizer();
-  } catch {
-    return { message: "You must be an organizer to create events." };
-  }
-
   const raw = {
     title: formData.get("title") as string,
-    description: (formData.get("description") as string) ?? "",
-    communityId: formData.get("communityId") as string,
-    category: (formData.get("category") as string) || "COMMUNITY",
-    location: (formData.get("location") as string) ?? "",
-    isOnline: formData.get("isOnline") === "true",
-    meetLink: (formData.get("meetLink") as string) ?? "",
+    description: formData.get("description") as string,
+    location: formData.get("location") as string,
+    isOnline: formData.get("isOnline") as string,
+    meetLink: formData.get("meetLink") as string,
     startAt: formData.get("startAt") as string,
     endAt: formData.get("endAt") as string,
     capacity: formData.get("capacity") as string,
     status: (formData.get("status") as string) || "DRAFT",
+    communityId: formData.get("communityId") as string,
   };
 
+  // 1. Validate
   const validated = createEventSchema.safeParse(raw);
   if (!validated.success) {
     return { errors: validated.error.flatten().fieldErrors };
   }
 
-  const communities = await getOrganizerCommunities(
-    organizer.id,
-    organizer.role
-  );
-
-  if (!communities.some((c) => c.id === validated.data.communityId)) {
-    return {
-      errors: {
-        communityId: ["You can only create events for communities you manage."],
-      },
-    };
+  // 2. Auth
+  let organizer;
+  try {
+    organizer = await getDbUser();
+  } catch {
+    return { message: "You must be signed in to create an event." };
   }
 
-  const slug = generateEventSlug(validated.data.title);
-  const description = embedCategoryInDescription(
-    validated.data.description,
-    validated.data.category
-  );
+  if (organizer.role !== "ORGANIZER" && organizer.role !== "ADMIN") {
+    return { message: "Only organizers and admins can create events." };
+  }
 
+  // 3. Resolve communityId (use first membership if not provided)
+  let communityId = raw.communityId;
+  if (!communityId) {
+    const membership = await prisma.membership.findFirst({
+      where: { userId: organizer.id, status: "ACTIVE" },
+    });
+    if (!membership) {
+      return { message: "You must be a member of a community to create events." };
+    }
+    communityId = membership.communityId;
+  }
+
+  // 4. Generate slug
+  const baseSlug = validated.data.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  const slug = `${baseSlug}-${Date.now()}`;
+
+  // 5. Create
   try {
     const event = await prisma.event.create({
       data: {
-        communityId: validated.data.communityId,
-        organizerId: organizer.id,
         title: validated.data.title,
         slug,
-        description,
-        location: validated.data.isOnline ? null : validated.data.location,
+        description: validated.data.description,
+        location: validated.data.location,
         isOnline: validated.data.isOnline,
-        meetLink: validated.data.isOnline ? validated.data.meetLink : null,
+        meetLink: validated.data.meetLink || null,
         startAt: new Date(validated.data.startAt),
         endAt: new Date(validated.data.endAt),
-        capacity:
-          validated.data.capacity === "" || validated.data.capacity === undefined
-            ? null
-            : validated.data.capacity,
-        status: validated.data.status as EventStatus,
+        capacity: validated.data.capacity ?? null,
+        status: validated.data.status as "DRAFT" | "PUBLISHED",
+        communityId,
+        organizerId: organizer.id,
       },
     });
 
-    revalidatePath("/member/events");
     revalidatePath("/organizer/events");
-    redirect(`/organizer/events/${event.slug}`);
-  } catch {
+    revalidatePath("/member/events");
+    return { success: true, eventId: event.id };
+  } catch (err) {
+    console.error("createEvent error:", err);
     return { message: "Failed to create event. Please try again." };
   }
 }
 
-/* ─── Fetch Events ───────────────────────────────────────────────────────────── */
+/* ─── RSVP ────────────────────────────────────────────────────────────────── */
 
-export async function getEvents(
-  filter: "upcoming" | "past" | "all" = "upcoming",
-  options?: { includeDrafts?: boolean; organizerId?: string }
-): Promise<ActionResult<EventListItem[]>> {
-  try {
-    const now = new Date();
-    const user = await getCurrentDbUser();
-
-    const statusFilter =
-      options?.includeDrafts && user && hasRole(user, ["ORGANIZER", "ADMIN"])
-        ? undefined
-        : { status: "PUBLISHED" as EventStatus };
-
-    const dateFilter =
-      filter === "upcoming"
-        ? { startAt: { gte: now } }
-        : filter === "past"
-          ? { startAt: { lt: now } }
-          : {};
-
-    const events = await prisma.event.findMany({
-      where: {
-        ...statusFilter,
-        ...dateFilter,
-        ...(options?.organizerId
-          ? { organizerId: options.organizerId }
-          : {}),
-      },
-      orderBy: { startAt: filter === "past" ? "desc" : "asc" },
-      include: {
-        community: { select: { id: true, name: true, slug: true } },
-        organizer: { select: { id: true, fullName: true } },
-        _count: {
-          select: {
-            registrations: {
-              where: { status: { in: ["REGISTERED", "WAITLISTED"] } },
-            },
-          },
-        },
-      },
-    });
-
-    return {
-      success: true,
-      data: events.map((event) => mapEventToListItem(event, now)),
-    };
-  } catch {
-    return { success: false, error: "Failed to load events." };
-  }
-}
-
-/* ─── Fetch Single Event ─────────────────────────────────────────────────────── */
-
-export async function getEventBySlug(
-  slug: string
-): Promise<ActionResult<EventDetail>> {
-  try {
-    const user = await getCurrentDbUser();
-    const now = new Date();
-
-    const event = await prisma.event.findUnique({
-      where: { slug },
-      include: {
-        community: { select: { id: true, name: true, slug: true } },
-        organizer: { select: { id: true, fullName: true } },
-        _count: {
-          select: {
-            registrations: {
-              where: { status: { in: ["REGISTERED", "WAITLISTED"] } },
-            },
-          },
-        },
-        registrations: user
-          ? {
-              where: { userId: user.id },
-              select: { id: true, status: true },
-              take: 1,
-            }
-          : false,
-      },
-    });
-
-    if (!event) {
-      return { success: false, error: "Event not found." };
-    }
-
-    const isOrganizer =
-      user &&
-      (event.organizerId === user.id || hasRole(user, ["ADMIN"]));
-
-    if (event.status !== "PUBLISHED" && !isOrganizer) {
-      return { success: false, error: "Event not found." };
-    }
-
-    const listItem = mapEventToListItem(event, now);
-    const userRegistration = user
-      ? (event.registrations?.[0] ?? null)
-      : null;
-
-    return {
-      success: true,
-      data: {
-        ...listItem,
-        qrToken: event.qrToken,
-        userRegistration,
-      },
-    };
-  } catch {
-    return { success: false, error: "Failed to load event." };
-  }
-}
-
-/* ─── RSVP ───────────────────────────────────────────────────────────────────── */
-
-export async function rsvpForEvent(
-  eventId: string
-): Promise<ActionResult<{ status: RegistrationStatus }>> {
-  const validated = rsvpSchema.safeParse({ eventId });
-  if (!validated.success) {
-    return { success: false, error: "Invalid event." };
-  }
-
+export async function rsvpAction(eventId: string): Promise<{ success: boolean; message?: string }> {
   let user;
   try {
-    user = await requireDbUser();
+    user = await getDbUser();
   } catch {
-    return { success: false, error: "You must be signed in to RSVP." };
+    return { success: false, message: "You must be signed in to RSVP." };
   }
 
-  try {
+  // Check existing registration
+  const existing = await prisma.registration.findUnique({
+    where: { userId_eventId: { userId: user.id, eventId } },
+  });
+
+  if (existing) {
+    if (existing.status === "REGISTERED") {
+      return { success: false, message: "You are already registered for this event." };
+    }
+    // Re-activate a cancelled registration
+    await prisma.registration.update({
+      where: { id: existing.id },
+      data: { status: "REGISTERED", cancelledAt: null },
+    });
+  } else {
+    // Check capacity
     const event = await prisma.event.findUnique({
-      where: { id: validated.data.eventId },
-      include: {
-        _count: {
-          select: {
-            registrations: { where: { status: "REGISTERED" } },
-          },
-        },
-      },
+      where: { id: eventId },
+      include: { _count: { select: { registrations: { where: { status: "REGISTERED" } } } } },
     });
 
-    if (!event) {
-      return { success: false, error: "Event not found." };
-    }
-
+    if (!event) return { success: false, message: "Event not found." };
     if (event.status !== "PUBLISHED") {
-      return { success: false, error: "This event is not open for registration." };
+      return { success: false, message: "This event is not open for registration." };
     }
 
-    if (!isEventUpcoming(event.startAt)) {
-      return { success: false, error: "This event has already started." };
-    }
-
-    const existing = await prisma.registration.findUnique({
-      where: {
-        userId_eventId: {
-          userId: user.id,
-          eventId: event.id,
-        },
-      },
-    });
-
-    if (existing) {
-      if (existing.status === "CANCELLED") {
-        const atCapacity =
-          event.capacity !== null &&
-          event._count.registrations >= event.capacity;
-
-        const registration = await prisma.registration.update({
-          where: { id: existing.id },
-          data: {
-            status: atCapacity ? "WAITLISTED" : "REGISTERED",
-            cancelledAt: null,
-            registeredAt: new Date(),
-          },
-        });
-
-        revalidatePath("/member/events");
-        revalidatePath(`/member/events/${event.slug}`);
-
-        return {
-          success: true,
-          data: { status: registration.status },
-          message: atCapacity
-            ? "Added to waitlist — event is at capacity."
-            : "You're registered!",
-        };
-      }
-
-      return {
-        success: false,
-        error:
-          existing.status === "WAITLISTED"
-            ? "You're already on the waitlist."
-            : "You're already registered for this event.",
-      };
-    }
-
-    const atCapacity =
+    const isFull =
       event.capacity !== null &&
       event._count.registrations >= event.capacity;
 
-    const registration = await prisma.registration.create({
+    await prisma.registration.create({
       data: {
         userId: user.id,
-        eventId: event.id,
-        status: atCapacity ? "WAITLISTED" : "REGISTERED",
+        eventId,
+        status: isFull ? "WAITLISTED" : "REGISTERED",
       },
     });
-
-    revalidatePath("/member/events");
-    revalidatePath(`/member/events/${event.slug}`);
-
-    return {
-      success: true,
-      data: { status: registration.status },
-      message: atCapacity
-        ? "Added to waitlist — event is at capacity."
-        : "You're registered!",
-    };
-  } catch {
-    return { success: false, error: "Failed to register. Please try again." };
   }
+
+  // Award community score for registering
+  const event = await prisma.event.findUnique({ where: { id: eventId } });
+  if (event) {
+    await prisma.communityScore.create({
+      data: {
+        userId: user.id,
+        communityId: event.communityId,
+        action: "ATTEND_EVENT",
+        points: 10,
+        refId: eventId,
+        note: `RSVP'd for ${event.title}`,
+      },
+    }).catch(() => {/* non-blocking */});
+  }
+
+  revalidatePath(`/member/events/${eventId}`);
+  revalidatePath("/member/events");
+  return { success: true };
 }
 
-/* ─── Organizer Communities (for create form) ────────────────────────────────── */
+/* ─── Cancel RSVP ─────────────────────────────────────────────────────────── */
 
-export async function getOrganizerCommunitiesAction(): Promise<
-  ActionResult<{ id: string; name: string; slug: string }[]>
-> {
+export async function cancelRsvpAction(eventId: string): Promise<{ success: boolean; message?: string }> {
+  let user;
   try {
-    const user = await requireOrganizer();
-    const communities = await getOrganizerCommunities(user.id, user.role);
-    return { success: true, data: communities };
+    user = await getDbUser();
   } catch {
-    return { success: false, error: "Unable to load communities." };
+    return { success: false, message: "You must be signed in." };
   }
+
+  await prisma.registration.updateMany({
+    where: { userId: user.id, eventId, status: { not: "CANCELLED" } },
+    data: { status: "CANCELLED", cancelledAt: new Date() },
+  });
+
+  revalidatePath(`/member/events/${eventId}`);
+  revalidatePath("/member/events");
+  return { success: true };
+}
+
+/* ─── Mark Attendance ────────────────────────────────────────────────────── */
+
+export async function markAttendanceAction(
+  eventId: string,
+  scannedToken: string
+): Promise<{ success: boolean; message: string; memberName?: string }> {
+  let organizer;
+  try {
+    organizer = await getDbUser();
+  } catch {
+    return { success: false, message: "Unauthorized" };
+  }
+
+  if (organizer.role !== "ORGANIZER" && organizer.role !== "ADMIN") {
+    return { success: false, message: "Only organizers can mark attendance." };
+  }
+
+  // Find registration by token (qrToken is stored on the event — we encode userId:eventId)
+  const [userId] = scannedToken.split(":");
+  if (!userId) return { success: false, message: "Invalid QR code." };
+
+  const registration = await prisma.registration.findUnique({
+    where: { userId_eventId: { userId, eventId } },
+    include: { user: true },
+  });
+
+  if (!registration) {
+    return { success: false, message: "No registration found for this member." };
+  }
+
+  if (registration.status === "CANCELLED") {
+    return { success: false, message: "This registration was cancelled." };
+  }
+
+  // Upsert attendance record
+  await prisma.attendance.upsert({
+    where: { userId_eventId: { userId, eventId } },
+    create: { userId, eventId, status: "PRESENT" },
+    update: { status: "PRESENT", scannedAt: new Date() },
+  });
+
+  revalidatePath(`/organizer/events/${eventId}/attendance`);
+  return {
+    success: true,
+    message: `✓ Marked ${registration.user.fullName} as present`,
+    memberName: registration.user.fullName,
+  };
 }

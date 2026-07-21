@@ -71,3 +71,25 @@ export function truncate(str: string, maxLength: number): string {
   if (str.length <= maxLength) return str;
   return `${str.slice(0, maxLength - 3)}...`;
 }
+
+/**
+ * Returns { month: "JUL", day: "25" } from a Date — for the date block UI.
+ */
+export function formatEventDate(date: Date): { month: string; day: string } {
+  const d = new Date(date);
+  return {
+    month: d.toLocaleString("en-US", { month: "short" }).toUpperCase(),
+    day: String(d.getDate()).padStart(2, "0"),
+  };
+}
+
+/**
+ * Returns "6:00 PM" format from a Date.
+ */
+export function formatEventTime(date: Date): string {
+  return new Date(date).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}

@@ -1,5 +1,4 @@
 import Link from "next/link";
-
 import { SidebarNav } from "@/components/hive/sidebar-nav";
 import { UserAvatar } from "@/components/hive/user-avatar";
 import { logoutAction } from "@/actions/auth";
@@ -16,63 +15,6 @@ interface SidebarProps {
   user: SidebarUser;
 }
 
-// ─── Navigation definitions per role ──────────────────────────────────────────
-
-const memberNav = [
-  {
-    items: [
-      { label: "Dashboard", href: "/member", icon: "dashboard" },
-      { label: "Events", href: "/member/events", icon: "calendar" },
-      { label: "Community", href: "/member/community", icon: "users" },
-      { label: "Opportunities", href: "/member/opportunities", icon: "briefcase" },
-      { label: "Leaderboard", href: "/member/leaderboard", icon: "trophy" },
-    ],
-  },
-];
-
-const organizerNav = [
-  {
-    title: "OVERVIEW",
-    items: [
-      { label: "Dashboard", href: "/organizer", icon: "dashboard" },
-      { label: "Events", href: "/organizer/events", icon: "calendar" },
-      { label: "Members", href: "/organizer/members", icon: "users" },
-      { label: "Announcements", href: "/organizer/announcements", icon: "megaphone" },
-    ],
-  },
-  {
-    title: "INSIGHTS",
-    items: [
-      { label: "Analytics", href: "/organizer/analytics", icon: "analytics" },
-    ],
-  },
-];
-
-const adminNav = [
-  {
-    title: "MANAGEMENT",
-    items: [
-      { label: "Dashboard", href: "/admin", icon: "dashboard" },
-      { label: "Members", href: "/admin/members", icon: "userCog" },
-      { label: "Communities", href: "/admin/communities", icon: "shieldCheck" },
-      { label: "Events", href: "/admin/events", icon: "calendar" },
-    ],
-  },
-  {
-    title: "SYSTEM",
-    items: [
-      { label: "Analytics", href: "/admin/analytics", icon: "analytics" },
-      { label: "Settings", href: "/admin/settings", icon: "settings" },
-    ],
-  },
-];
-
-function getNavGroups(role: UserRole) {
-  if (role === "ADMIN") return adminNav;
-  if (role === "ORGANIZER") return organizerNav;
-  return memberNav;
-}
-
 function getRoleLabel(role: UserRole) {
   if (role === "ADMIN") return "ADMIN";
   if (role === "ORGANIZER") return "ORGANIZER";
@@ -81,18 +23,16 @@ function getRoleLabel(role: UserRole) {
 
 /**
  * Sidebar — Server Component.
- * Navigation state (active) handled by the SidebarNav client sub-component.
+ *
+ * Passes only a plain `role` string to SidebarNav (Client Component).
+ * LucideIcon components are resolved entirely client-side — they never
+ * cross the RSC serialization boundary (which caused the runtime crash).
  */
 export function Sidebar({ user }: SidebarProps) {
-  const navGroups = getNavGroups(user.role);
-
   return (
     <aside
       className="hidden md:flex flex-col w-56 shrink-0 border-r h-screen sticky top-0 overflow-hidden"
-      style={{
-        background: "#ffffff",
-        borderColor: "var(--hive-border)",
-      }}
+      style={{ background: "#ffffff", borderColor: "var(--hive-border)" }}
     >
       {/* Logo */}
       <div
@@ -102,10 +42,7 @@ export function Sidebar({ user }: SidebarProps) {
         <Link href="/" className="flex items-center gap-2 group">
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm font-bold transition-transform group-hover:scale-105"
-            style={{
-              background: "var(--hive-primary)",
-              fontFamily: "var(--font-mono)",
-            }}
+            style={{ background: "var(--hive-primary)", fontFamily: "var(--font-mono)" }}
           >
             H
           </div>
@@ -118,12 +55,12 @@ export function Sidebar({ user }: SidebarProps) {
         </Link>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation — role string is the only prop, icons resolved client-side */}
       <div className="flex-1 overflow-y-auto px-3 py-4">
-        <SidebarNav groups={navGroups} />
+        <SidebarNav role={user.role} />
       </div>
 
-      {/* User section */}
+      {/* User footer */}
       <div
         className="px-3 py-3 border-t shrink-0"
         style={{ borderColor: "var(--hive-border)" }}
@@ -132,33 +69,23 @@ export function Sidebar({ user }: SidebarProps) {
           className="flex items-center gap-2.5 px-2 py-2 rounded-xl"
           style={{ background: "var(--hive-surface)" }}
         >
-          <UserAvatar
-            name={user.fullName}
-            avatarUrl={user.avatarUrl}
-            size="sm"
-          />
+          <UserAvatar name={user.fullName} avatarUrl={user.avatarUrl} size="sm" />
           <div className="flex-1 min-w-0">
             <p
               className="text-xs font-semibold truncate"
-              style={{
-                color: "var(--hive-text)",
-                fontFamily: "var(--font-sans)",
-              }}
+              style={{ color: "var(--hive-text)", fontFamily: "var(--font-sans)" }}
             >
               {user.fullName}
             </p>
             <p
               className="text-[10px] truncate mt-0.5"
-              style={{
-                color: "var(--hive-primary)",
-                fontFamily: "var(--font-mono)",
-              }}
+              style={{ color: "var(--hive-primary)", fontFamily: "var(--font-mono)" }}
             >
               {getRoleLabel(user.role)}
             </p>
           </div>
 
-          {/* Logout */}
+          {/* Logout form action */}
           <form action={logoutAction}>
             <button
               type="submit"
@@ -168,14 +95,9 @@ export function Sidebar({ user }: SidebarProps) {
               aria-label="Sign out"
             >
               <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                width="14" height="14" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
               >
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                 <polyline points="16 17 21 12 16 7" />

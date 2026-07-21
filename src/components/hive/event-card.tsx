@@ -1,149 +1,186 @@
 import Link from "next/link";
-import { CalendarDays, Clock, MapPin, Users } from "lucide-react";
-import { formatDate, generateHiveId } from "@/lib/utils";
-import type { EventListItem } from "@/actions/events";
+import { CalendarDays, MapPin, Clock, Users, Wifi } from "lucide-react";
+import { formatEventDate, formatEventTime } from "@/lib/utils";
 
 interface EventCardProps {
-  event: EventListItem;
-  href: string;
-  showStatus?: boolean;
+  event: {
+    id: string;
+    title: string;
+    slug: string;
+    description?: string | null;
+    location?: string | null;
+    isOnline: boolean;
+    startAt: Date;
+    endAt: Date;
+    status: string;
+    capacity?: number | null;
+    _count?: { registrations: number };
+  };
+  /** href override — defaults to /member/events/[id] */
+  href?: string;
+  /** show organizer controls (edit, status badge) */
+  organizer?: boolean;
 }
 
-const categoryColors: Record<string, { bg: string; color: string }> = {
-  WORKSHOP: { bg: "var(--hive-primary-light)", color: "var(--hive-primary)" },
-  HACKATHON: { bg: "#f3e8ff", color: "#a855f7" },
-  COMMUNITY: { bg: "#f0fdf4", color: "var(--hive-success)" },
-  MEETUP: { bg: "#fef3c7", color: "#d97706" },
-  TALK: { bg: "#ffe4e4", color: "var(--hive-accent)" },
+const statusStyles: Record<string, { bg: string; color: string; label: string }> = {
+  DRAFT:     { bg: "var(--hive-surface)",     color: "var(--hive-muted)",    label: "DRAFT"     },
+  PUBLISHED: { bg: "var(--hive-primary-light)", color: "var(--hive-primary)", label: "PUBLISHED" },
+  CANCELLED: { bg: "#fef2f2",                color: "#dc2626",              label: "CANCELLED" },
+  COMPLETED: { bg: "#f0fdf4",                color: "var(--hive-success)",  label: "COMPLETED" },
 };
 
-const statusColors: Record<string, { bg: string; color: string }> = {
-  DRAFT: { bg: "var(--hive-surface)", color: "var(--hive-muted)" },
-  PUBLISHED: { bg: "#f0fdf4", color: "var(--hive-success)" },
-  CANCELLED: { bg: "#fef2f2", color: "var(--hive-error)" },
-  COMPLETED: { bg: "var(--hive-primary-light)", color: "var(--hive-primary)" },
-};
-
-/**
- * EventCard — reusable card for event list grids.
- */
-export function EventCard({ event, href, showStatus = false }: EventCardProps) {
-  const categoryStyle =
-    categoryColors[event.category] ?? categoryColors.COMMUNITY;
-  const statusStyle = statusColors[event.status] ?? statusColors.DRAFT;
-  const timeLabel = event.startAt.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-  const locationLabel = event.isOnline
-    ? "ONLINE"
-    : event.location ?? "TBA";
+export function EventCard({ event, href, organizer = false }: EventCardProps) {
+  const link = href ?? `/member/events/${event.id}`;
+  const s = statusStyles[event.status] ?? statusStyles.DRAFT;
+  const spotsLeft =
+    event.capacity != null && event._count
+      ? event.capacity - event._count.registrations
+      : null;
 
   return (
-    <Link href={href} className="hive-card p-5 flex flex-col gap-4 group">
-      {/* Tags row */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span
-          className="hive-badge text-[10px]"
-          style={{
-            color: event.isUpcoming ? "var(--hive-primary)" : "var(--hive-muted)",
-            background: event.isUpcoming
-              ? "var(--hive-primary-light)"
-              : "var(--hive-surface)",
-            borderColor: event.isUpcoming
-              ? "var(--hive-primary-light)"
-              : "var(--hive-border)",
-          }}
+    <Link
+      href={link}
+      className="hive-card flex flex-col gap-4 p-5 group"
+    >
+      {/* Top row: date block + title */}
+      <div className="flex items-start gap-4">
+        {/* Date block */}
+        <div
+          className="flex flex-col items-center justify-center w-14 h-14 rounded-xl shrink-0 text-white"
+          style={{ background: "var(--hive-primary)" }}
         >
-          {event.isUpcoming ? "UPCOMING" : "PAST"}
-        </span>
-        <span
-          className="hive-badge text-[10px]"
-          style={{
-            color: categoryStyle.color,
-            background: categoryStyle.bg,
-            borderColor: categoryStyle.bg,
-          }}
-        >
-          {event.category}
-        </span>
-        {event.isOnline && (
           <span
-            className="hive-badge text-[10px]"
-            style={{
-              color: "var(--hive-primary)",
-              background: "var(--hive-primary-light)",
-              borderColor: "var(--hive-primary-light)",
-            }}
+            className="text-[10px] font-bold uppercase leading-none"
+            style={{ fontFamily: "var(--font-mono)", opacity: 0.8 }}
           >
-            ONLINE
+            {formatEventDate(event.startAt).month}
           </span>
-        )}
-        {showStatus && (
           <span
-            className="hive-badge text-[10px]"
-            style={{
-              color: statusStyle.color,
-              background: statusStyle.bg,
-              borderColor: statusStyle.bg,
-            }}
+            className="text-2xl font-bold leading-tight"
+            style={{ fontFamily: "var(--font-mono)" }}
           >
-            {event.status}
+            {formatEventDate(event.startAt).day}
           </span>
-        )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            {/* Status badge — organizer only */}
+            {organizer && (
+              <span
+                className="hive-badge text-[10px]"
+                style={{ color: s.color, background: s.bg, borderColor: s.bg }}
+              >
+                {s.label}
+              </span>
+            )}
+            {/* Format badge */}
+            <span
+              className="hive-badge text-[10px]"
+              style={{
+                color: "var(--hive-muted)",
+                background: "var(--hive-surface)",
+                borderColor: "var(--hive-border)",
+              }}
+            >
+              {event.isOnline ? "ONLINE" : "IN_PERSON"}
+            </span>
+          </div>
+          <h3
+            className="text-sm font-bold leading-snug group-hover:text-[var(--hive-primary)] transition-colors"
+            style={{ color: "var(--hive-text)" }}
+          >
+            {event.title}
+          </h3>
+          {event.description && (
+            <p
+              className="text-xs mt-1 line-clamp-2"
+              style={{ color: "var(--hive-muted)" }}
+            >
+              {event.description}
+            </p>
+          )}
+        </div>
       </div>
 
-      {/* Title */}
-      <div className="flex-1">
-        <p
-          className="text-[10px] mb-1"
-          style={{ color: "var(--hive-muted)", fontFamily: "var(--font-mono)" }}
-        >
-          {generateHiveId("EVENT", parseInt(event.id.slice(-3), 16) % 1000)}
-        </p>
-        <h3
-          className="text-base font-bold leading-snug group-hover:text-[var(--hive-primary)] transition-colors"
-          style={{ color: "var(--hive-text)" }}
-        >
-          {event.title}
-        </h3>
-        {event.description && (
-          <p
-            className="text-sm mt-1.5 line-clamp-2"
-            style={{ color: "var(--hive-muted)" }}
-          >
-            {event.description}
-          </p>
-        )}
-      </div>
-
-      {/* Meta */}
+      {/* Meta row */}
       <div
-        className="flex flex-col gap-1.5 text-xs pt-3 border-t"
-        style={{
-          borderColor: "var(--hive-border)",
-          color: "var(--hive-muted)",
-          fontFamily: "var(--font-mono)",
-        }}
+        className="flex items-center gap-4 text-xs flex-wrap"
+        style={{ color: "var(--hive-muted)", fontFamily: "var(--font-mono)" }}
       >
-        <span className="flex items-center gap-1.5">
-          <CalendarDays size={12} />
-          {formatDate(event.startAt)}
-        </span>
-        <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-1">
           <Clock size={12} />
-          {timeLabel}
+          {formatEventTime(event.startAt)} – {formatEventTime(event.endAt)}
         </span>
-        <span className="flex items-center gap-1.5">
-          <MapPin size={12} />
-          {locationLabel}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Users size={12} />
-          {event.registrationCount}
-          {event.capacity ? ` / ${event.capacity}` : ""} RSVPS
-        </span>
+        {event.isOnline ? (
+          <span className="flex items-center gap-1">
+            <Wifi size={12} /> Online
+          </span>
+        ) : event.location ? (
+          <span className="flex items-center gap-1 truncate max-w-[180px]">
+            <MapPin size={12} /> {event.location}
+          </span>
+        ) : null}
+        {event._count !== undefined && (
+          <span className="flex items-center gap-1 ml-auto">
+            <Users size={12} />
+            {event._count.registrations}
+            {event.capacity ? `/${event.capacity}` : ""} RSVP
+          </span>
+        )}
+        {spotsLeft !== null && spotsLeft <= 5 && spotsLeft > 0 && (
+          <span
+            className="hive-badge text-[10px] ml-auto"
+            style={{
+              color: "var(--hive-accent)",
+              background: "#ffe4e4",
+              borderColor: "#ffe4e4",
+            }}
+          >
+            {spotsLeft} SPOT{spotsLeft !== 1 ? "S" : ""}_LEFT
+          </span>
+        )}
+        {spotsLeft === 0 && (
+          <span
+            className="hive-badge text-[10px] ml-auto"
+            style={{ color: "#dc2626", background: "#fef2f2", borderColor: "#fef2f2" }}
+          >
+            FULL
+          </span>
+        )}
       </div>
+
+      {/* Organizer quick-actions */}
+      {organizer && (
+        <div
+          className="pt-3 border-t flex items-center gap-2"
+          style={{ borderColor: "var(--hive-border)" }}
+        >
+          <Link
+            href={`/organizer/events/${event.id}`}
+            className="hive-btn px-3 py-1.5 text-[11px]"
+            style={{
+              background: "var(--hive-primary-light)",
+              color: "var(--hive-primary)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            MANAGE
+          </Link>
+          <Link
+            href={`/organizer/events/${event.id}/attendance`}
+            className="hive-btn px-3 py-1.5 text-[11px]"
+            style={{
+              background: "var(--hive-surface)",
+              color: "var(--hive-muted)",
+              border: "1px solid var(--hive-border)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            ATTENDANCE
+          </Link>
+        </div>
+      )}
     </Link>
   );
 }

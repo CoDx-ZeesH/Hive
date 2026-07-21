@@ -1,113 +1,147 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import Link from "next/link";
-import { Plus } from "lucide-react";
-import { getEvents } from "@/actions/events";
+import { CalendarDays, Search } from "lucide-react";
 import { EventCard } from "@/components/hive/event-card";
-import { EventsFilterTabs } from "@/components/hive/events-filter-tabs";
-import { getCurrentDbUser, hasRole } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Events",
-  description: "Browse upcoming and past community events on Hive.",
+  description: "Browse upcoming community events, workshops, and hackathons.",
 };
 
-interface MemberEventsPageProps {
-  searchParams: Promise<{ filter?: string }>;
-}
+// ─── Mock events — Phase 4: connected to Prisma after DB is live ─────────────
 
-export default async function MemberEventsPage({
-  searchParams,
-}: MemberEventsPageProps) {
-  const { filter: filterParam } = await searchParams;
-  const filter = filterParam === "past" ? "past" : "upcoming";
-  const result = await getEvents(filter);
-  const user = await getCurrentDbUser();
-  const canCreate =
-    user && hasRole(user, ["ORGANIZER", "ADMIN"]);
+const mockEvents = [
+  {
+    id: "evt-001",
+    title: "Build Night: Web3 x AI",
+    slug: "build-night-web3-ai",
+    description:
+      "An evening of hacking, learning, and building at the intersection of Web3 and AI. Open to all skill levels.",
+    location: null,
+    isOnline: true,
+    startAt: new Date("2026-07-25T18:00:00"),
+    endAt: new Date("2026-07-25T21:00:00"),
+    status: "PUBLISHED",
+    capacity: 50,
+    _count: { registrations: 34 },
+  },
+  {
+    id: "evt-002",
+    title: "Open Source Sprint",
+    slug: "open-source-sprint",
+    description:
+      "Pick an open source project and contribute alongside fellow community members. All skill levels welcome — maintainers will be on hand to guide you.",
+    location: "Innovation Hub, Room 204",
+    isOnline: false,
+    startAt: new Date("2026-08-02T10:00:00"),
+    endAt: new Date("2026-08-02T17:00:00"),
+    status: "PUBLISHED",
+    capacity: 30,
+    _count: { registrations: 12 },
+  },
+  {
+    id: "evt-003",
+    title: "Monthly Community Call",
+    slug: "monthly-community-call",
+    description:
+      "Our monthly all-hands: community updates, shoutouts, upcoming events, and open floor discussion.",
+    location: null,
+    isOnline: true,
+    startAt: new Date("2026-08-05T19:00:00"),
+    endAt: new Date("2026-08-05T20:00:00"),
+    status: "PUBLISHED",
+    capacity: null,
+    _count: { registrations: 8 },
+  },
+  {
+    id: "evt-004",
+    title: "Figma to Code Workshop",
+    slug: "figma-to-code",
+    description:
+      "Hands-on session converting Figma designs to production-ready Next.js components.",
+    location: "Tech Campus, Lab A",
+    isOnline: false,
+    startAt: new Date("2026-08-12T14:00:00"),
+    endAt: new Date("2026-08-12T17:00:00"),
+    status: "PUBLISHED",
+    capacity: 20,
+    _count: { registrations: 19 },
+  },
+];
 
+export default function MemberEventsPage() {
   return (
-    <div className="flex flex-col gap-8 max-w-6xl">
+    <div className="flex flex-col gap-8 max-w-3xl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <div>
-          <span
-            className="hive-badge mb-2 inline-flex"
-            style={{
-              color: "var(--hive-primary)",
-              background: "var(--hive-primary-light)",
-              borderColor: "var(--hive-primary-light)",
-            }}
-          >
-            EVENTS
-          </span>
-          <h2
-            className="text-3xl font-bold"
-            style={{ color: "var(--hive-text)" }}
-          >
-            Community Events
-          </h2>
-          <p className="text-sm mt-1" style={{ color: "var(--hive-muted)" }}>
-            Discover workshops, hackathons, and meetups in your community.
-          </p>
-        </div>
+      <div className="flex flex-col gap-1">
+        <span
+          className="hive-badge mb-1 inline-flex w-fit"
+          style={{ color: "var(--hive-primary)", background: "var(--hive-primary-light)", borderColor: "var(--hive-primary-light)" }}
+        >
+          EVENTS_DIRECTORY
+        </span>
+        <h2 className="text-3xl font-bold" style={{ color: "var(--hive-text)" }}>
+          Upcoming Events
+        </h2>
+        <p className="text-sm" style={{ color: "var(--hive-muted)" }}>
+          {mockEvents.length} events scheduled — click to RSVP and see details.
+        </p>
+      </div>
 
-        {canCreate && (
-          <Link
-            href="/organizer/events/new"
-            className="hive-btn inline-flex items-center gap-2 px-4 py-2.5 text-white text-xs shrink-0"
-            style={{ background: "var(--hive-primary)" }}
-          >
-            <Plus size={14} />
-            CREATE_EVENT
-          </Link>
+      {/* Search bar (UI only — Phase 5 will wire up) */}
+      <div
+        className="flex items-center gap-3 hive-input px-4 py-3"
+      >
+        <Search size={16} style={{ color: "var(--hive-muted)" }} />
+        <input
+          type="search"
+          placeholder="Search events by title, tag, or location..."
+          className="flex-1 bg-transparent text-sm outline-none"
+          style={{ color: "var(--hive-text)" }}
+          aria-label="Search events"
+        />
+      </div>
+
+      {/* Filter chips */}
+      <div className="flex gap-2 flex-wrap">
+        {["ALL_EVENTS", "ONLINE", "IN_PERSON", "HACKATHON", "WORKSHOP"].map(
+          (chip, i) => (
+            <button
+              key={chip}
+              type="button"
+              className="hive-badge cursor-pointer transition-colors"
+              style={{
+                color: i === 0 ? "#fff" : "var(--hive-muted)",
+                background: i === 0 ? "var(--hive-primary)" : "var(--hive-surface)",
+                borderColor: i === 0 ? "var(--hive-primary)" : "var(--hive-border)",
+              }}
+            >
+              {chip}
+            </button>
+          )
         )}
       </div>
 
-      {/* Filter tabs */}
-      <Suspense fallback={null}>
-        <EventsFilterTabs basePath="/member/events" />
-      </Suspense>
-
-      {/* Events grid */}
-      {!result.success ? (
-        <div
-          className="hive-card p-8 text-center text-sm"
-          style={{ color: "var(--hive-muted)" }}
-        >
-          {result.error}
-        </div>
-      ) : result.data.length === 0 ? (
-        <div
-          className="hive-card p-12 flex flex-col items-center gap-3 text-center"
-          style={{ color: "var(--hive-muted)" }}
-        >
-          <p className="text-sm">
-            {filter === "past"
-              ? "No past events yet."
-              : "No upcoming events scheduled."}
-          </p>
-          {canCreate && filter === "upcoming" && (
-            <Link
-              href="/organizer/events/new"
-              className="hive-btn px-4 py-2 text-white text-xs"
-              style={{ background: "var(--hive-primary)" }}
+      {/* Events list */}
+      <div className="flex flex-col gap-4">
+        {mockEvents.length === 0 ? (
+          <div
+            className="hive-card p-12 flex flex-col items-center gap-3"
+            style={{ textAlign: "center" }}
+          >
+            <CalendarDays size={32} style={{ color: "var(--hive-muted)" }} />
+            <p
+              className="text-sm font-semibold"
+              style={{ fontFamily: "var(--font-mono)", color: "var(--hive-muted)" }}
             >
-              CREATE_FIRST_EVENT
-            </Link>
-          )}
-        </div>
-      ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {result.data.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              href={`/member/events/${event.slug}`}
-            />
-          ))}
-        </div>
-      )}
+              NO_EVENTS_FOUND
+            </p>
+          </div>
+        ) : (
+          mockEvents.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))
+        )}
+      </div>
     </div>
   );
 }

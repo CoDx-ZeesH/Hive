@@ -1,47 +1,44 @@
 import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { EventForm } from "@/components/hive/event-form";
+import { CreateAnnouncementForm } from "@/components/hive/create-announcement-form";
 
 export const metadata: Metadata = {
-  title: "Create Event",
-  description: "Schedule a new community event.",
+  title: "Post Announcement",
+  description: "Broadcast a message to your entire community.",
 };
 
-export default function CreateEventPage() {
+export default function NewAnnouncementPage() {
   return (
     <div className="flex flex-col gap-8 max-w-2xl">
-      {/* Back */}
       <Link
-        href="/organizer/events"
+        href="/organizer/announcements"
         className="flex items-center gap-1.5 text-xs w-fit hover:underline"
         style={{ color: "var(--hive-muted)", fontFamily: "var(--font-mono)" }}
       >
-        <ArrowLeft size={13} /> BACK_TO_EVENTS
+        <ArrowLeft size={13} /> BACK_TO_ANNOUNCEMENTS
       </Link>
 
-      {/* Header */}
       <div>
         <span
           className="hive-badge mb-1 inline-flex w-fit"
           style={{ color: "var(--hive-accent)", background: "#ffe4e4", borderColor: "#ffe4e4" }}
         >
-          NEW_EVENT
+          NEW_ANNOUNCEMENT
         </span>
         <h2 className="text-3xl font-bold" style={{ color: "var(--hive-text)" }}>
-          Create an Event
+          Post to Community
         </h2>
         <p className="text-sm mt-1" style={{ color: "var(--hive-muted)" }}>
-          Fill in the details below. You can save as a draft and publish later.
+          All community members will see this on their dashboard.
         </p>
       </div>
 
-      {/* Form card */}
       <div
         className="bg-white border rounded-2xl p-8"
         style={{ borderColor: "var(--hive-border)", boxShadow: "var(--shadow-md)" }}
       >
-        <EventForm />
+        <CreateAnnouncementForm />
       </div>
     </div>
   );
