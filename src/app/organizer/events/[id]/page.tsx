@@ -3,44 +3,10 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Edit, Users, QrCode, BarChart2 } from "lucide-react";
 import Link from "next/link";
 import { QrDisplay } from "@/components/hive/qr-display";
+import { MarkCompletedButton } from "@/components/hive/mark-completed-button";
 import { formatDate, formatEventTime } from "@/lib/utils";
 
-// ─── Mock until DB is live ────────────────────────────────────────────────────
-
-const mockEvents: Record<string, {
-  id: string; title: string; description: string;
-  location: string | null; isOnline: boolean;
-  startAt: Date; endAt: Date; status: string;
-  capacity: number | null; qrToken: string;
-  _count: { registrations: number; attendance: number };
-}> = {
-  "evt-001": {
-    id: "evt-001",
-    title: "Build Night: Web3 x AI",
-    description: "An evening of hacking at the intersection of Web3 and AI.",
-    location: null,
-    isOnline: true,
-    startAt: new Date("2026-07-25T18:00:00"),
-    endAt: new Date("2026-07-25T21:00:00"),
-    status: "PUBLISHED",
-    capacity: 50,
-    qrToken: "evt-001-qr-token",
-    _count: { registrations: 34, attendance: 0 },
-  },
-  "evt-002": {
-    id: "evt-002",
-    title: "Open Source Sprint",
-    description: "Contribute to open source alongside community members.",
-    location: "Innovation Hub, Room 204",
-    isOnline: false,
-    startAt: new Date("2026-08-02T10:00:00"),
-    endAt: new Date("2026-08-02T17:00:00"),
-    status: "DRAFT",
-    capacity: 30,
-    qrToken: "evt-002-qr-token",
-    _count: { registrations: 0, attendance: 0 },
-  },
-};
+import { prisma } from "@/lib/prisma";
 
 export async function generateMetadata({
   params,
@@ -48,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const event = mockEvents[id];
+  const event = await prisma.event.findUnique({ where: { id } });
   return { title: event?.title ? `Manage: ${event.title}` : "Event Not Found" };
 }
 
@@ -58,7 +24,18 @@ export default async function OrganizerEventDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const event = mockEvents[id];
+  const event = await prisma.event.findUnique({
+    where: { id },
+    include: {
+      _count: {
+        select: {
+          registrations: true,
+          attendance: true,
+        },
+      },
+    },
+  });
+
   if (!event) notFound();
 
   const attendanceRate =
@@ -80,17 +57,26 @@ export default async function OrganizerEventDetailPage({
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <div className="flex gap-2 mb-2">
+          <div className="flex flex-col gap-2 mb-2">
             <span
-              className="hive-badge text-[10px]"
+              className="hive-badge text-[10px] w-fit"
               style={{
-                color: event.status === "PUBLISHED" ? "var(--hive-primary)" : "var(--hive-muted)",
-                background: event.status === "PUBLISHED" ? "var(--hive-primary-light)" : "var(--hive-surface)",
-                borderColor: event.status === "PUBLISHED" ? "var(--hive-primary-light)" : "var(--hive-border)",
+                color: event.status === "PUBLISHED" ? "#22c55e" : event.status === "PENDING" ? "#f59e0b" : event.status === "REJECTED" ? "#ef4444" : "var(--hive-muted)",
+                background: event.status === "PUBLISHED" ? "#f0fdf4" : event.status === "PENDING" ? "#fffbeb" : event.status === "REJECTED" ? "#fef2f2" : "var(--hive-surface)",
+                borderColor: event.status === "PUBLISHED" ? "#22c55e" : event.status === "PENDING" ? "#f59e0b" : event.status === "REJECTED" ? "#ef4444" : "var(--hive-border)",
+                fontFamily: "var(--font-mono)",
               }}
             >
-              {event.status}
+              [{event.status}]
             </span>
+            {event.status === "REJECTED" && event.rejectionReason && (
+              <div
+                className="p-3 rounded-xl border text-xs"
+                style={{ background: "#fef2f2", borderColor: "#fecaca", color: "#dc2626", fontFamily: "var(--font-mono)" }}
+              >
+                <span className="font-bold">REJECTION_REASON:</span> {event.rejectionReason}
+              </div>
+            )}
           </div>
           <h2 className="text-3xl font-bold" style={{ color: "var(--hive-text)" }}>
             {event.title}
@@ -100,20 +86,18 @@ export default async function OrganizerEventDetailPage({
             {event.location ? ` · ${event.location}` : " · Online"}
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className="hive-btn px-4 py-2.5 text-sm flex items-center gap-2"
-            style={{ background: "var(--hive-surface)", color: "var(--hive-muted)", border: "1px solid var(--hive-border)" }}
-          >
-            <Edit size={14} /> EDIT
-          </button>
+        <div className="flex gap-2 items-center flex-wrap">
+          <MarkCompletedButton
+            eventId={event.id}
+            eventStatus={event.status}
+            attendedCount={event._count.attendance}
+          />
           <Link
             href={`/organizer/events/${event.id}/attendance`}
-            className="hive-btn px-4 py-2.5 text-sm text-white flex items-center gap-2"
+            className="hive-btn px-4 py-2.5 text-xs text-white flex items-center gap-2"
             style={{ background: "var(--hive-primary)" }}
           >
-            <Users size={14} /> ATTENDANCE
+            <Users size={14} /> ROSTER_&_ATTENDANCE
           </Link>
         </div>
       </div>

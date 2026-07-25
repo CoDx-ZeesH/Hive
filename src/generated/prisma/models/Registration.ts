@@ -28,7 +28,7 @@ export type RegistrationMinAggregateOutputType = {
   id: string | null
   userId: string | null
   eventId: string | null
-  status: $Enums.RegistrationStatus | null
+  status: $Enums.RsvpStatus | null
   registeredAt: Date | null
   cancelledAt: Date | null
 }
@@ -37,7 +37,7 @@ export type RegistrationMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   eventId: string | null
-  status: $Enums.RegistrationStatus | null
+  status: $Enums.RsvpStatus | null
   registeredAt: Date | null
   cancelledAt: Date | null
 }
@@ -157,7 +157,7 @@ export type RegistrationGroupByOutputType = {
   id: string
   userId: string
   eventId: string
-  status: $Enums.RegistrationStatus
+  status: $Enums.RsvpStatus
   registeredAt: Date
   cancelledAt: Date | null
   _count: RegistrationCountAggregateOutputType | null
@@ -187,7 +187,7 @@ export type RegistrationWhereInput = {
   id?: Prisma.StringFilter<"Registration"> | string
   userId?: Prisma.StringFilter<"Registration"> | string
   eventId?: Prisma.StringFilter<"Registration"> | string
-  status?: Prisma.EnumRegistrationStatusFilter<"Registration"> | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFilter<"Registration"> | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
   cancelledAt?: Prisma.DateTimeNullableFilter<"Registration"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -213,7 +213,7 @@ export type RegistrationWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.RegistrationWhereInput | Prisma.RegistrationWhereInput[]
   userId?: Prisma.StringFilter<"Registration"> | string
   eventId?: Prisma.StringFilter<"Registration"> | string
-  status?: Prisma.EnumRegistrationStatusFilter<"Registration"> | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFilter<"Registration"> | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
   cancelledAt?: Prisma.DateTimeNullableFilter<"Registration"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -239,14 +239,14 @@ export type RegistrationScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Registration"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Registration"> | string
   eventId?: Prisma.StringWithAggregatesFilter<"Registration"> | string
-  status?: Prisma.EnumRegistrationStatusWithAggregatesFilter<"Registration"> | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusWithAggregatesFilter<"Registration"> | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeWithAggregatesFilter<"Registration"> | Date | string
   cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Registration"> | Date | string | null
 }
 
 export type RegistrationCreateInput = {
   id?: string
-  status?: $Enums.RegistrationStatus
+  status?: $Enums.RsvpStatus
   registeredAt?: Date | string
   cancelledAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutRegistrationsInput
@@ -257,14 +257,14 @@ export type RegistrationUncheckedCreateInput = {
   id?: string
   userId: string
   eventId: string
-  status?: $Enums.RegistrationStatus
+  status?: $Enums.RsvpStatus
   registeredAt?: Date | string
   cancelledAt?: Date | string | null
 }
 
 export type RegistrationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFieldUpdateOperationsInput | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutRegistrationsNestedInput
@@ -275,7 +275,7 @@ export type RegistrationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFieldUpdateOperationsInput | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -284,14 +284,14 @@ export type RegistrationCreateManyInput = {
   id?: string
   userId: string
   eventId: string
-  status?: $Enums.RegistrationStatus
+  status?: $Enums.RsvpStatus
   registeredAt?: Date | string
   cancelledAt?: Date | string | null
 }
 
 export type RegistrationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFieldUpdateOperationsInput | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -300,7 +300,7 @@ export type RegistrationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFieldUpdateOperationsInput | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -431,8 +431,8 @@ export type RegistrationUncheckedUpdateManyWithoutEventNestedInput = {
   deleteMany?: Prisma.RegistrationScalarWhereInput | Prisma.RegistrationScalarWhereInput[]
 }
 
-export type EnumRegistrationStatusFieldUpdateOperationsInput = {
-  set?: $Enums.RegistrationStatus
+export type EnumRsvpStatusFieldUpdateOperationsInput = {
+  set?: $Enums.RsvpStatus
 }
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -441,7 +441,7 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type RegistrationCreateWithoutUserInput = {
   id?: string
-  status?: $Enums.RegistrationStatus
+  status?: $Enums.RsvpStatus
   registeredAt?: Date | string
   cancelledAt?: Date | string | null
   event: Prisma.EventCreateNestedOneWithoutRegistrationsInput
@@ -450,7 +450,7 @@ export type RegistrationCreateWithoutUserInput = {
 export type RegistrationUncheckedCreateWithoutUserInput = {
   id?: string
   eventId: string
-  status?: $Enums.RegistrationStatus
+  status?: $Enums.RsvpStatus
   registeredAt?: Date | string
   cancelledAt?: Date | string | null
 }
@@ -488,14 +488,14 @@ export type RegistrationScalarWhereInput = {
   id?: Prisma.StringFilter<"Registration"> | string
   userId?: Prisma.StringFilter<"Registration"> | string
   eventId?: Prisma.StringFilter<"Registration"> | string
-  status?: Prisma.EnumRegistrationStatusFilter<"Registration"> | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFilter<"Registration"> | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
   cancelledAt?: Prisma.DateTimeNullableFilter<"Registration"> | Date | string | null
 }
 
 export type RegistrationCreateWithoutEventInput = {
   id?: string
-  status?: $Enums.RegistrationStatus
+  status?: $Enums.RsvpStatus
   registeredAt?: Date | string
   cancelledAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutRegistrationsInput
@@ -504,7 +504,7 @@ export type RegistrationCreateWithoutEventInput = {
 export type RegistrationUncheckedCreateWithoutEventInput = {
   id?: string
   userId: string
-  status?: $Enums.RegistrationStatus
+  status?: $Enums.RsvpStatus
   registeredAt?: Date | string
   cancelledAt?: Date | string | null
 }
@@ -538,14 +538,14 @@ export type RegistrationUpdateManyWithWhereWithoutEventInput = {
 export type RegistrationCreateManyUserInput = {
   id?: string
   eventId: string
-  status?: $Enums.RegistrationStatus
+  status?: $Enums.RsvpStatus
   registeredAt?: Date | string
   cancelledAt?: Date | string | null
 }
 
 export type RegistrationUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFieldUpdateOperationsInput | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   event?: Prisma.EventUpdateOneRequiredWithoutRegistrationsNestedInput
@@ -554,7 +554,7 @@ export type RegistrationUpdateWithoutUserInput = {
 export type RegistrationUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFieldUpdateOperationsInput | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -562,7 +562,7 @@ export type RegistrationUncheckedUpdateWithoutUserInput = {
 export type RegistrationUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventId?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFieldUpdateOperationsInput | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -570,14 +570,14 @@ export type RegistrationUncheckedUpdateManyWithoutUserInput = {
 export type RegistrationCreateManyEventInput = {
   id?: string
   userId: string
-  status?: $Enums.RegistrationStatus
+  status?: $Enums.RsvpStatus
   registeredAt?: Date | string
   cancelledAt?: Date | string | null
 }
 
 export type RegistrationUpdateWithoutEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFieldUpdateOperationsInput | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutRegistrationsNestedInput
@@ -586,7 +586,7 @@ export type RegistrationUpdateWithoutEventInput = {
 export type RegistrationUncheckedUpdateWithoutEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFieldUpdateOperationsInput | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -594,7 +594,7 @@ export type RegistrationUncheckedUpdateWithoutEventInput = {
 export type RegistrationUncheckedUpdateManyWithoutEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
+  status?: Prisma.EnumRsvpStatusFieldUpdateOperationsInput | $Enums.RsvpStatus
   registeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -667,7 +667,7 @@ export type $RegistrationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     id: string
     userId: string
     eventId: string
-    status: $Enums.RegistrationStatus
+    status: $Enums.RsvpStatus
     registeredAt: Date
     cancelledAt: Date | null
   }, ExtArgs["result"]["registration"]>
@@ -1098,7 +1098,7 @@ export interface RegistrationFieldRefs {
   readonly id: Prisma.FieldRef<"Registration", 'String'>
   readonly userId: Prisma.FieldRef<"Registration", 'String'>
   readonly eventId: Prisma.FieldRef<"Registration", 'String'>
-  readonly status: Prisma.FieldRef<"Registration", 'RegistrationStatus'>
+  readonly status: Prisma.FieldRef<"Registration", 'RsvpStatus'>
   readonly registeredAt: Prisma.FieldRef<"Registration", 'DateTime'>
   readonly cancelledAt: Prisma.FieldRef<"Registration", 'DateTime'>
 }

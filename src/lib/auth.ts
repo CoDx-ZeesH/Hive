@@ -29,22 +29,38 @@ function usernameFromEmail(email: string): string {
 
 /**
  * Finds or creates the Prisma User row for the current Supabase session.
+ * The `User` record in PostgreSQL is treated as the single source of truth for user roles.
  */
 export async function getCurrentDbUser(): Promise<User | null> {
   const authUser = await getSessionUser();
   if (!authUser?.email) return null;
 
-  const existing = await prisma.user.findUnique({
-    where: { authId: authUser.id },
+  // 1. Check if user already exists in Prisma DB by authId OR email
+  let existing = await prisma.user.findFirst({
+    where: {
+      OR: [{ authId: authUser.id }, { email: authUser.email }],
+    },
   });
 
-  if (existing) return existing;
+  if (existing) {
+    // Ensure authId is linked if it was missing or matched only by email
+    if (existing.authId !== authUser.id) {
+      existing = await prisma.user.update({
+        where: { email: existing.email },
+        data: { authId: authUser.id },
+      });
+    }
+    // Return the actual record from your Prisma DB (with the DB role!)
+    return existing;
+  }
 
+  // 2. If user truly does not exist in DB, create a new record
   const fullName =
     (authUser.user_metadata?.full_name as string | undefined) ??
     authUser.email.split("@")[0] ??
     "Member";
 
+  // Fallback role for brand-new users
   const role =
     ((authUser.user_metadata?.role as string | undefined) ?? "MEMBER") as UserRole;
 

@@ -13,26 +13,45 @@ async function syncUserToDb(
   authId: string,
   email: string,
   fullName: string
-): Promise<void> {
+): Promise<string | null> {
   try {
-    // Generate a unique username from the email prefix
     const baseUsername = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "_");
+    const uniqueUsername = `${baseUsername}_${authId.slice(0, 6)}`;
 
-    await prisma.user.upsert({
-      where: { authId },
-      update: { email, fullName },
-      create: {
-        authId,
-        email,
-        fullName,
-        username: `${baseUsername}_${authId.slice(0, 6)}`, // guaranteed unique
-        role: "ADMIN",
-      },
-    });
+    // 1. Look up the existing user
+    const existingUser = await prisma.user.findFirst({ where: { email } });
+
+    let finalRole: string;
+
+    if (existingUser) {
+      // 2. Update if they exist
+      const updatedUser = await prisma.user.update({
+        where: { id: existingUser.id },
+        data: { authId, fullName },
+        select: { role: true },
+      });
+      finalRole = updatedUser.role;
+    } else {
+      // 3. Create if they are new
+      const createdUser = await prisma.user.create({
+        data: {
+          authId,
+          email,
+          fullName,
+          username: uniqueUsername,
+          skills: [],
+          interests: [],
+        },
+        select: { role: true },
+      });
+      finalRole = createdUser.role;
+    }
+
+    // TypeScript now guarantees finalRole is a string!
+    return finalRole;
   } catch (err) {
-    // Non-fatal: DB may not be configured yet in dev.
-    // The app works without it — Supabase session is the source of truth for auth.
-    console.warn("[syncUserToDb] Could not sync user:", err);
+    console.error("[syncUserToDb] Prisma failed to sync user:", err);
+    return null;
   }
 }
 
@@ -71,17 +90,23 @@ export async function loginAction(
     };
   }
 
-  // 3. Sync to Prisma (non-blocking, best-effort)
+  // 3. Sync to Prisma & Fetch ACTUAL role
+  let role: string | undefined = undefined;
+
   if (data.user) {
     const fullName =
       (data.user.user_metadata?.full_name as string | undefined) ??
       data.user.email?.split("@")[0] ??
       "Member";
-    await syncUserToDb(data.user.id, data.user.email!, fullName);
+
+    // FIX 3: Get the role directly from your Prisma database
+    const dbRole = await syncUserToDb(data.user.id, data.user.email!, fullName);
+    
+    // Fallback to Supabase metadata if DB fetch fails
+    role = dbRole ?? (data.user.user_metadata?.role as string | undefined);
   }
 
-  // 4. Determine redirect by role from metadata
-  const role = data.user?.user_metadata?.role as string | undefined;
+  // 4. Determine redirect by actual Prisma DB role
   const dest = role === "ADMIN" ? "/admin" : role === "ORGANIZER" ? "/organizer" : "/member";
 
   revalidatePath("/", "layout");
@@ -131,9 +156,13 @@ export async function registerAction(
     };
   }
 
-  // 3. Sync new user to Prisma DB (best-effort)
+  let dest = "/member";
+
+  // 3. Sync new user to Prisma DB 
   if (data.user) {
-    await syncUserToDb(data.user.id, data.user.email!, validated.data.fullName);
+    const dbRole = await syncUserToDb(data.user.id, data.user.email!, validated.data.fullName);
+    if (dbRole === "ADMIN") dest = "/admin";
+    if (dbRole === "ORGANIZER") dest = "/organizer";
   }
 
   // 4. If email confirmation is required, show success message
@@ -145,13 +174,13 @@ export async function registerAction(
     };
   }
 
-  // 5. Auto-signed in → redirect to dashboard
+  // 5. Auto-signed in → redirect based on DB role
   revalidatePath("/", "layout");
-  redirect("/member");
+  redirect(dest);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   LOGOUT
+  LOGOUT
    ───────────────────────────────────────────────────────────────────────────── */
 
 export async function logoutAction(): Promise<void> {

@@ -86,25 +86,8 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
       className={cn("h-full", jetbrainsMono.variable, "font-sans", geist.variable)}
       suppressHydrationWarning
     >
-      <head>
-        {/*
-         * Plus Jakarta Sans — loaded via Google Fonts preconnect.
-         * This is our General Sans substitute (similar aesthetic, freely available).
-         * The @font-face in globals.css handles the actual loading.
-         */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="min-h-dvh flex flex-col antialiased">
-        <TooltipProvider delay={300}>
+      <body className="min-h-dvh flex flex-col antialiased" suppressHydrationWarning>
+        <TooltipProvider>
           {children}
         </TooltipProvider>
       </body>

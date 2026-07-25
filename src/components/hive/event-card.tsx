@@ -14,6 +14,7 @@ interface EventCardProps {
     endAt: Date;
     status: string;
     capacity?: number | null;
+    rejectionReason?: string | null;
     _count?: { registrations: number };
   };
   /** href override — defaults to /member/events/[id] */
@@ -23,10 +24,12 @@ interface EventCardProps {
 }
 
 const statusStyles: Record<string, { bg: string; color: string; label: string }> = {
-  DRAFT:     { bg: "var(--hive-surface)",     color: "var(--hive-muted)",    label: "DRAFT"     },
-  PUBLISHED: { bg: "var(--hive-primary-light)", color: "var(--hive-primary)", label: "PUBLISHED" },
-  CANCELLED: { bg: "#fef2f2",                color: "#dc2626",              label: "CANCELLED" },
-  COMPLETED: { bg: "#f0fdf4",                color: "var(--hive-success)",  label: "COMPLETED" },
+  DRAFT:     { bg: "var(--hive-surface)", color: "var(--hive-muted)",   label: "[DRAFT]"     },
+  PENDING:   { bg: "#fffbeb",             color: "#f59e0b",             label: "[PENDING]"   },
+  PUBLISHED: { bg: "#f0fdf4",             color: "#22c55e",             label: "[PUBLISHED]" },
+  REJECTED:  { bg: "#fef2f2",             color: "#ef4444",             label: "[REJECTED]"  },
+  CANCELLED: { bg: "#fef2f2",             color: "#dc2626",             label: "[CANCELLED]" },
+  COMPLETED: { bg: "#ecfeff",             color: "var(--hive-primary)", label: "[COMPLETED]" },
 };
 
 export function EventCard({ event, href, organizer = false }: EventCardProps) {
@@ -149,6 +152,16 @@ export function EventCard({ event, href, organizer = false }: EventCardProps) {
           </span>
         )}
       </div>
+
+      {/* Rejection notice for organizer */}
+      {organizer && event.status === "REJECTED" && event.rejectionReason && (
+        <div
+          className="p-3 rounded-xl border text-xs"
+          style={{ background: "#fef2f2", borderColor: "#fecaca", color: "#dc2626", fontFamily: "var(--font-mono)" }}
+        >
+          <span className="font-bold">REJECTION_REASON:</span> {event.rejectionReason}
+        </div>
+      )}
 
       {/* Organizer quick-actions */}
       {organizer && (

@@ -20,21 +20,23 @@ export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
 export const EventStatus = {
   DRAFT: 'DRAFT',
+  PENDING: 'PENDING',
   PUBLISHED: 'PUBLISHED',
-  CANCELLED: 'CANCELLED',
+  REJECTED: 'REJECTED',
   COMPLETED: 'COMPLETED'
 } as const
 
 export type EventStatus = (typeof EventStatus)[keyof typeof EventStatus]
 
 
-export const RegistrationStatus = {
-  REGISTERED: 'REGISTERED',
+export const RsvpStatus = {
+  APPROVED: 'APPROVED',
   WAITLISTED: 'WAITLISTED',
-  CANCELLED: 'CANCELLED'
+  CANCELLED: 'CANCELLED',
+  ATTENDED: 'ATTENDED'
 } as const
 
-export type RegistrationStatus = (typeof RegistrationStatus)[keyof typeof RegistrationStatus]
+export type RsvpStatus = (typeof RsvpStatus)[keyof typeof RsvpStatus]
 
 
 export const AttendanceStatus = {

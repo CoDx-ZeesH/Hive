@@ -1256,6 +1256,7 @@ export const EventScalarFieldEnum = {
   startAt: 'startAt',
   endAt: 'endAt',
   capacity: 'capacity',
+  rejectionReason: 'rejectionReason',
   qrToken: 'qrToken',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1460,16 +1461,16 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
- * Reference to a field of type 'RegistrationStatus'
+ * Reference to a field of type 'RsvpStatus'
  */
-export type EnumRegistrationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RegistrationStatus'>
+export type EnumRsvpStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RsvpStatus'>
     
 
 
 /**
- * Reference to a field of type 'RegistrationStatus[]'
+ * Reference to a field of type 'RsvpStatus[]'
  */
-export type ListEnumRegistrationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RegistrationStatus[]'>
+export type ListEnumRsvpStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RsvpStatus[]'>
     
 
 

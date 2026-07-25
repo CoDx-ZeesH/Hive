@@ -36,7 +36,7 @@ export async function createEventAction(
     startAt: formData.get("startAt") as string,
     endAt: formData.get("endAt") as string,
     capacity: formData.get("capacity") as string,
-    status: (formData.get("status") as string) || "DRAFT",
+    status: (formData.get("status") as string) || "PENDING",
     communityId: formData.get("communityId") as string,
   };
 
@@ -58,16 +58,21 @@ export async function createEventAction(
     return { message: "Only organizers and admins can create events." };
   }
 
-  // 3. Resolve communityId (use first membership if not provided)
+  // 3. Resolve communityId (use first membership if not provided, or first community)
   let communityId = raw.communityId;
   if (!communityId) {
     const membership = await prisma.membership.findFirst({
       where: { userId: organizer.id, status: "ACTIVE" },
     });
-    if (!membership) {
-      return { message: "You must be a member of a community to create events." };
+    if (membership) {
+      communityId = membership.communityId;
+    } else {
+      const anyCommunity = await prisma.community.findFirst();
+      if (!anyCommunity) {
+        return { message: "No active community found to assign this event." };
+      }
+      communityId = anyCommunity.id;
     }
-    communityId = membership.communityId;
   }
 
   // 4. Generate slug
@@ -90,7 +95,7 @@ export async function createEventAction(
         startAt: new Date(validated.data.startAt),
         endAt: new Date(validated.data.endAt),
         capacity: validated.data.capacity ?? null,
-        status: validated.data.status as "DRAFT" | "PUBLISHED",
+        status: validated.data.status,
         communityId,
         organizerId: organizer.id,
       },
@@ -98,6 +103,7 @@ export async function createEventAction(
 
     revalidatePath("/organizer/events");
     revalidatePath("/member/events");
+    revalidatePath("/admin/events");
     return { success: true, eventId: event.id };
   } catch (err) {
     console.error("createEvent error:", err);
@@ -121,19 +127,19 @@ export async function rsvpAction(eventId: string): Promise<{ success: boolean; m
   });
 
   if (existing) {
-    if (existing.status === "REGISTERED") {
+    if (existing.status === "APPROVED") {
       return { success: false, message: "You are already registered for this event." };
     }
     // Re-activate a cancelled registration
     await prisma.registration.update({
       where: { id: existing.id },
-      data: { status: "REGISTERED", cancelledAt: null },
+      data: { status: "APPROVED", cancelledAt: null },
     });
   } else {
     // Check capacity
     const event = await prisma.event.findUnique({
       where: { id: eventId },
-      include: { _count: { select: { registrations: { where: { status: "REGISTERED" } } } } },
+      include: { _count: { select: { registrations: { where: { status: "APPROVED" } } } } },
     });
 
     if (!event) return { success: false, message: "Event not found." };
@@ -149,7 +155,7 @@ export async function rsvpAction(eventId: string): Promise<{ success: boolean; m
       data: {
         userId: user.id,
         eventId,
-        status: isFull ? "WAITLISTED" : "REGISTERED",
+        status: isFull ? "WAITLISTED" : "APPROVED",
       },
     });
   }
@@ -240,5 +246,177 @@ export async function markAttendanceAction(
     success: true,
     message: `✓ Marked ${registration.user.fullName} as present`,
     memberName: registration.user.fullName,
+  };
+}
+
+/* ─── Admin: Approve Event ────────────────────────────────────────────────── */
+
+export async function approveEventAction(eventId: string): Promise<{ success: boolean; message?: string }> {
+  let admin;
+  try {
+    admin = await getDbUser();
+  } catch {
+    return { success: false, message: "Unauthorized" };
+  }
+
+  if (admin.role !== "ADMIN") {
+    return { success: false, message: "Only administrators can approve events." };
+  }
+
+  await prisma.event.update({
+    where: { id: eventId },
+    data: { status: "PUBLISHED", rejectionReason: null },
+  });
+
+  revalidatePath("/admin/events");
+  revalidatePath("/organizer/events");
+  revalidatePath("/member/events");
+  return { success: true, message: "Event approved and published!" };
+}
+
+/* ─── Admin: Reject Event ─────────────────────────────────────────────────── */
+
+export async function rejectEventAction(
+  eventId: string,
+  rejectionReason: string
+): Promise<{ success: boolean; message?: string }> {
+  let admin;
+  try {
+    admin = await getDbUser();
+  } catch {
+    return { success: false, message: "Unauthorized" };
+  }
+
+  if (admin.role !== "ADMIN") {
+    return { success: false, message: "Only administrators can reject events." };
+  }
+
+  if (!rejectionReason || rejectionReason.trim().length === 0) {
+    return { success: false, message: "Rejection reason is required." };
+  }
+
+  await prisma.event.update({
+    where: { id: eventId },
+    data: { status: "REJECTED", rejectionReason: rejectionReason.trim() },
+  });
+
+  revalidatePath("/admin/events");
+  revalidatePath("/organizer/events");
+  revalidatePath("/member/events");
+  return { success: true, message: "Event rejected." };
+}
+
+/* ─── Organizer: Update RSVP Status ───────────────────────────────────────── */
+
+export async function updateRsvpStatusAction(
+  registrationId: string,
+  newStatus: "APPROVED" | "WAITLISTED" | "CANCELLED" | "ATTENDED"
+): Promise<{ success: boolean; message?: string }> {
+  let organizer;
+  try {
+    organizer = await getDbUser();
+  } catch {
+    return { success: false, message: "Unauthorized" };
+  }
+
+  const registration = await prisma.registration.findUnique({
+    where: { id: registrationId },
+    include: { event: true },
+  });
+
+  if (!registration) {
+    return { success: false, message: "Registration not found." };
+  }
+
+  if (organizer.role !== "ADMIN" && registration.event.organizerId !== organizer.id) {
+    return { success: false, message: "Only the event organizer or admin can modify RSVP status." };
+  }
+
+  await prisma.registration.update({
+    where: { id: registrationId },
+    data: {
+      status: newStatus,
+      cancelledAt: newStatus === "CANCELLED" ? new Date() : null,
+    },
+  });
+
+  revalidatePath(`/organizer/events/${registration.eventId}/attendance`);
+  revalidatePath(`/organizer/events/${registration.eventId}`);
+  return { success: true, message: `RSVP status updated to ${newStatus}` };
+}
+
+/* ─── Organizer: Complete Event & Trigger Scoring Engine ───────────────────── */
+
+export async function completeEventAction(eventId: string): Promise<{ success: boolean; message?: string; pointsAwarded?: number }> {
+  let organizer;
+  try {
+    organizer = await getDbUser();
+  } catch {
+    return { success: false, message: "Unauthorized" };
+  }
+
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    include: {
+      registrations: {
+        where: { status: "ATTENDED" },
+      },
+    },
+  });
+
+  if (!event) {
+    return { success: false, message: "Event not found." };
+  }
+
+  if (organizer.role !== "ADMIN" && event.organizerId !== organizer.id) {
+    return { success: false, message: "Only the event organizer or admin can mark this event as completed." };
+  }
+
+  // 1. Mark event status as COMPLETED
+  await prisma.event.update({
+    where: { id: eventId },
+    data: { status: "COMPLETED" },
+  });
+
+  // 2. Award community scores to all ATTENDED members (50 points per attendee)
+  const POINTS_PER_ATTENDANCE = 50;
+  let totalPoints = 0;
+
+  for (const reg of event.registrations) {
+    // Avoid double scoring if already scored for this event
+    const existingScore = await prisma.communityScore.findFirst({
+      where: {
+        userId: reg.userId,
+        communityId: event.communityId,
+        action: "ATTEND_EVENT",
+        refId: eventId,
+      },
+    });
+
+    if (!existingScore) {
+      await prisma.communityScore.create({
+        data: {
+          userId: reg.userId,
+          communityId: event.communityId,
+          action: "ATTEND_EVENT",
+          points: POINTS_PER_ATTENDANCE,
+          refId: eventId,
+          note: `Attended event: ${event.title}`,
+        },
+      });
+      totalPoints += POINTS_PER_ATTENDANCE;
+    }
+  }
+
+  revalidatePath(`/organizer/events/${eventId}`);
+  revalidatePath("/organizer/events");
+  revalidatePath("/member/events");
+  revalidatePath("/member/leaderboard");
+  revalidatePath("/member/profile");
+
+  return {
+    success: true,
+    message: `✓ Event marked as COMPLETED! Awarded ${totalPoints} total points to ${event.registrations.length} attendee(s).`,
+    pointsAwarded: totalPoints,
   };
 }

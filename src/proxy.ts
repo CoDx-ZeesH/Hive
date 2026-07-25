@@ -1,18 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
-/**
- * Hive Auth Proxy (Next.js 16 — renamed from middleware)
- *
- * Responsibilities:
- * 1. Refresh the Supabase session on every request so RSCs always have
- *    a valid, non-expired session available via cookies.
- * 2. RBAC route protection:
- *    - /member   → requires any authenticated user
- *    - /organizer → requires role ORGANIZER or ADMIN (checked via user metadata)
- *    - /admin    → requires role ADMIN
- *    - /login, /register → redirect authenticated users away to /member
- */
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -37,49 +25,56 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // ⚠️ IMPORTANT: Do NOT remove this call.
-  // It refreshes the session so Server Components see a valid user.
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
 
-  // ─── Authenticated users: redirect away from auth pages ──────────────────
-  const authPaths = ["/login", "/register"];
-  if (user && authPaths.some((p) => pathname.startsWith(p))) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/member";
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  // ─── Unauthenticated users: protect dashboard routes ─────────────────────
+  // --- 1. Unauthenticated Users ---
   const protectedPaths = ["/member", "/organizer", "/admin"];
-  if (!user && protectedPaths.some((p) => pathname.startsWith(p))) {
+  const isProtectedPath = protectedPaths.some((p) => pathname.startsWith(p));
+  
+  if (!user && isProtectedPath) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // ─── RBAC: organizer/admin role enforcement ───────────────────────────────
+  // --- 2. Authenticated Users Routing ---
   if (user) {
-    const userRole =
-      (user.user_metadata?.role as string | undefined) ?? "MEMBER";
+    const userRole = (user.user_metadata?.role as string | undefined) ?? "MEMBER";
+    
+    // Determine user's designated root dashboard
+    let userDashboard = "/member";
+    if (userRole === "ADMIN") userDashboard = "/admin";
+    else if (userRole === "ORGANIZER") userDashboard = "/organizer";
 
-    if (pathname.startsWith("/admin") && userRole !== "ADMIN") {
+    // Redirect away from auth pages and the root path "/"
+    const authPaths = ["/login", "/register"];
+    if (authPaths.some((p) => pathname.startsWith(p)) || pathname === "/") {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/member";
+      redirectUrl.pathname = userDashboard;
       return NextResponse.redirect(redirectUrl);
     }
 
-    if (
-      pathname.startsWith("/organizer") &&
-      userRole !== "ORGANIZER" &&
-      userRole !== "ADMIN"
-    ) {
+    // Strict role enforcement
+    if (pathname.startsWith("/admin") && userRole !== "ADMIN") {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/member";
+      redirectUrl.pathname = userDashboard;
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (pathname.startsWith("/organizer") && userRole !== "ORGANIZER") {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = userDashboard;
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (pathname.startsWith("/member") && userRole !== "MEMBER") {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = userDashboard;
       return NextResponse.redirect(redirectUrl);
     }
   }
@@ -89,12 +84,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths EXCEPT:
-     * - _next/static (static files)
-     * - _next/image (image optimization)
-     * - favicon.ico, sitemap.xml, robots.txt
-     */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)"
   ],
 };

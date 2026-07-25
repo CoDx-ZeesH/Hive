@@ -49,6 +49,7 @@ export type EventMinAggregateOutputType = {
   startAt: Date | null
   endAt: Date | null
   capacity: number | null
+  rejectionReason: string | null
   qrToken: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -69,6 +70,7 @@ export type EventMaxAggregateOutputType = {
   startAt: Date | null
   endAt: Date | null
   capacity: number | null
+  rejectionReason: string | null
   qrToken: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -89,6 +91,7 @@ export type EventCountAggregateOutputType = {
   startAt: number
   endAt: number
   capacity: number
+  rejectionReason: number
   qrToken: number
   createdAt: number
   updatedAt: number
@@ -119,6 +122,7 @@ export type EventMinAggregateInputType = {
   startAt?: true
   endAt?: true
   capacity?: true
+  rejectionReason?: true
   qrToken?: true
   createdAt?: true
   updatedAt?: true
@@ -139,6 +143,7 @@ export type EventMaxAggregateInputType = {
   startAt?: true
   endAt?: true
   capacity?: true
+  rejectionReason?: true
   qrToken?: true
   createdAt?: true
   updatedAt?: true
@@ -159,6 +164,7 @@ export type EventCountAggregateInputType = {
   startAt?: true
   endAt?: true
   capacity?: true
+  rejectionReason?: true
   qrToken?: true
   createdAt?: true
   updatedAt?: true
@@ -266,6 +272,7 @@ export type EventGroupByOutputType = {
   startAt: Date
   endAt: Date
   capacity: number | null
+  rejectionReason: string | null
   qrToken: string
   createdAt: Date
   updatedAt: Date
@@ -309,6 +316,7 @@ export type EventWhereInput = {
   startAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   endAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   capacity?: Prisma.IntNullableFilter<"Event"> | number | null
+  rejectionReason?: Prisma.StringNullableFilter<"Event"> | string | null
   qrToken?: Prisma.StringFilter<"Event"> | string
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
@@ -333,6 +341,7 @@ export type EventOrderByWithRelationInput = {
   startAt?: Prisma.SortOrder
   endAt?: Prisma.SortOrder
   capacity?: Prisma.SortOrderInput | Prisma.SortOrder
+  rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   qrToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -361,6 +370,7 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   startAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   endAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   capacity?: Prisma.IntNullableFilter<"Event"> | number | null
+  rejectionReason?: Prisma.StringNullableFilter<"Event"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   community?: Prisma.XOR<Prisma.CommunityScalarRelationFilter, Prisma.CommunityWhereInput>
@@ -384,6 +394,7 @@ export type EventOrderByWithAggregationInput = {
   startAt?: Prisma.SortOrder
   endAt?: Prisma.SortOrder
   capacity?: Prisma.SortOrderInput | Prisma.SortOrder
+  rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   qrToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -412,6 +423,7 @@ export type EventScalarWhereWithAggregatesInput = {
   startAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
   endAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
   capacity?: Prisma.IntNullableWithAggregatesFilter<"Event"> | number | null
+  rejectionReason?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
   qrToken?: Prisma.StringWithAggregatesFilter<"Event"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Event"> | Date | string
@@ -430,6 +442,7 @@ export type EventCreateInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -454,6 +467,7 @@ export type EventUncheckedCreateInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -474,6 +488,7 @@ export type EventUpdateInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -498,6 +513,7 @@ export type EventUncheckedUpdateInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -520,6 +536,7 @@ export type EventCreateManyInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -538,6 +555,7 @@ export type EventUpdateManyMutationInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -558,6 +576,7 @@ export type EventUncheckedUpdateManyInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -588,6 +607,7 @@ export type EventCountOrderByAggregateInput = {
   startAt?: Prisma.SortOrder
   endAt?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
+  rejectionReason?: Prisma.SortOrder
   qrToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -612,6 +632,7 @@ export type EventMaxOrderByAggregateInput = {
   startAt?: Prisma.SortOrder
   endAt?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
+  rejectionReason?: Prisma.SortOrder
   qrToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -632,6 +653,7 @@ export type EventMinOrderByAggregateInput = {
   startAt?: Prisma.SortOrder
   endAt?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
+  rejectionReason?: Prisma.SortOrder
   qrToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -787,6 +809,7 @@ export type EventCreateWithoutOrganizerInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -809,6 +832,7 @@ export type EventUncheckedCreateWithoutOrganizerInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -860,6 +884,7 @@ export type EventScalarWhereInput = {
   startAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   endAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   capacity?: Prisma.IntNullableFilter<"Event"> | number | null
+  rejectionReason?: Prisma.StringNullableFilter<"Event"> | string | null
   qrToken?: Prisma.StringFilter<"Event"> | string
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
@@ -878,6 +903,7 @@ export type EventCreateWithoutCommunityInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -900,6 +926,7 @@ export type EventUncheckedCreateWithoutCommunityInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -946,6 +973,7 @@ export type EventCreateWithoutRegistrationsInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -969,6 +997,7 @@ export type EventUncheckedCreateWithoutRegistrationsInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1004,6 +1033,7 @@ export type EventUpdateWithoutRegistrationsInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1027,6 +1057,7 @@ export type EventUncheckedUpdateWithoutRegistrationsInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1046,6 +1077,7 @@ export type EventCreateWithoutAttendanceInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1069,6 +1101,7 @@ export type EventUncheckedCreateWithoutAttendanceInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1104,6 +1137,7 @@ export type EventUpdateWithoutAttendanceInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1127,6 +1161,7 @@ export type EventUncheckedUpdateWithoutAttendanceInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1147,6 +1182,7 @@ export type EventCreateManyOrganizerInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1165,6 +1201,7 @@ export type EventUpdateWithoutOrganizerInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1187,6 +1224,7 @@ export type EventUncheckedUpdateWithoutOrganizerInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1208,6 +1246,7 @@ export type EventUncheckedUpdateManyWithoutOrganizerInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1227,6 +1266,7 @@ export type EventCreateManyCommunityInput = {
   startAt: Date | string
   endAt: Date | string
   capacity?: number | null
+  rejectionReason?: string | null
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1245,6 +1285,7 @@ export type EventUpdateWithoutCommunityInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1267,6 +1308,7 @@ export type EventUncheckedUpdateWithoutCommunityInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1288,6 +1330,7 @@ export type EventUncheckedUpdateManyWithoutCommunityInput = {
   startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1348,6 +1391,7 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   startAt?: boolean
   endAt?: boolean
   capacity?: boolean
+  rejectionReason?: boolean
   qrToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1373,6 +1417,7 @@ export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   startAt?: boolean
   endAt?: boolean
   capacity?: boolean
+  rejectionReason?: boolean
   qrToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1395,6 +1440,7 @@ export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   startAt?: boolean
   endAt?: boolean
   capacity?: boolean
+  rejectionReason?: boolean
   qrToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1417,12 +1463,13 @@ export type EventSelectScalar = {
   startAt?: boolean
   endAt?: boolean
   capacity?: boolean
+  rejectionReason?: boolean
   qrToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "communityId" | "organizerId" | "title" | "slug" | "description" | "coverUrl" | "location" | "isOnline" | "meetLink" | "status" | "startAt" | "endAt" | "capacity" | "qrToken" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
+export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "communityId" | "organizerId" | "title" | "slug" | "description" | "coverUrl" | "location" | "isOnline" | "meetLink" | "status" | "startAt" | "endAt" | "capacity" | "rejectionReason" | "qrToken" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
 export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
   organizer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1462,6 +1509,7 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     startAt: Date
     endAt: Date
     capacity: number | null
+    rejectionReason: string | null
     qrToken: string
     createdAt: Date
     updatedAt: Date
@@ -1906,6 +1954,7 @@ export interface EventFieldRefs {
   readonly startAt: Prisma.FieldRef<"Event", 'DateTime'>
   readonly endAt: Prisma.FieldRef<"Event", 'DateTime'>
   readonly capacity: Prisma.FieldRef<"Event", 'Int'>
+  readonly rejectionReason: Prisma.FieldRef<"Event", 'String'>
   readonly qrToken: Prisma.FieldRef<"Event", 'String'>
   readonly createdAt: Prisma.FieldRef<"Event", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Event", 'DateTime'>

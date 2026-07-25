@@ -143,6 +143,7 @@ export const EventScalarFieldEnum = {
   startAt: 'startAt',
   endAt: 'endAt',
   capacity: 'capacity',
+  rejectionReason: 'rejectionReason',
   qrToken: 'qrToken',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

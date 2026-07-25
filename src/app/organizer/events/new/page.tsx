@@ -2,13 +2,43 @@ import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { EventForm } from "@/components/hive/event-form";
+import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Create Event",
   description: "Schedule a new community event.",
 };
 
-export default function CreateEventPage() {
+export default async function CreateEventPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+  
+  if (!dbUser || (dbUser.role !== "ORGANIZER" && dbUser.role !== "ADMIN")) {
+    redirect("/member");
+  }
+
+  // Fetch communities the organizer is assigned to
+  const memberships = await prisma.membership.findMany({
+    where: { userId: dbUser.id, role: "ORGANIZER" },
+    include: { community: true }
+  });
+
+  const communities = memberships.map(m => m.community);
+
+  // Admins can create events for any community
+  let allCommunities = communities;
+  if (dbUser.role === "ADMIN") {
+    allCommunities = await prisma.community.findMany();
+  }
+
   return (
     <div className="flex flex-col gap-8 max-w-2xl">
       {/* Back */}
@@ -41,7 +71,7 @@ export default function CreateEventPage() {
         className="bg-white border rounded-2xl p-8"
         style={{ borderColor: "var(--hive-border)", boxShadow: "var(--shadow-md)" }}
       >
-        <EventForm />
+        <EventForm communities={allCommunities.map(c => ({ id: c.id, name: c.name }))} />
       </div>
     </div>
   );

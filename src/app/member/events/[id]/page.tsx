@@ -7,42 +7,7 @@ import { RsvpButton } from "@/components/hive/rsvp-button";
 import { QrDisplay } from "@/components/hive/qr-display";
 import { formatEventDate, formatEventTime, formatDate } from "@/lib/utils";
 
-// ─── Mock data until Prisma DB is connected ──────────────────────────────────
-
-const mockEvents: Record<string, {
-  id: string; title: string; description: string;
-  location: string | null; isOnline: boolean;
-  startAt: Date; endAt: Date; status: string;
-  capacity: number | null; _count: { registrations: number };
-  organizer: { fullName: string };
-}> = {
-  "evt-001": {
-    id: "evt-001",
-    title: "Build Night: Web3 x AI",
-    description: `An evening of hacking, learning, and building at the intersection of Web3 and AI. Open to all skill levels.\n\nWhat to expect:\n- 1h intro talk on current Web3 + AI tools\n- 2h free build time with mentors available\n- Demo presentations and community vote\n\nBring your laptop and your curiosity!`,
-    location: null,
-    isOnline: true,
-    startAt: new Date("2026-07-25T18:00:00"),
-    endAt: new Date("2026-07-25T21:00:00"),
-    status: "PUBLISHED",
-    capacity: 50,
-    _count: { registrations: 34 },
-    organizer: { fullName: "Hive Core Team" },
-  },
-  "evt-002": {
-    id: "evt-002",
-    title: "Open Source Sprint",
-    description: "Pick an open source project and contribute alongside fellow community members. All skill levels welcome.",
-    location: "Innovation Hub, Room 204",
-    isOnline: false,
-    startAt: new Date("2026-08-02T10:00:00"),
-    endAt: new Date("2026-08-02T17:00:00"),
-    status: "PUBLISHED",
-    capacity: 30,
-    _count: { registrations: 12 },
-    organizer: { fullName: "Hive Core Team" },
-  },
-};
+import { prisma } from "@/lib/prisma";
 
 export async function generateMetadata({
   params,
@@ -50,7 +15,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const event = mockEvents[id];
+  const event = await prisma.event.findUnique({ where: { id } });
   return {
     title: event?.title ?? "Event Not Found",
     description: event?.description?.slice(0, 160),
@@ -63,24 +28,45 @@ export default async function MemberEventDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const event = mockEvents[id];
+  const event = await prisma.event.findUnique({
+    where: { id },
+    include: {
+      organizer: true,
+      _count: {
+        select: {
+          registrations: { where: { status: { in: ["APPROVED", "ATTENDED"] } } },
+        },
+      },
+    },
+  });
+
   if (!event) notFound();
 
   // Get current user for RSVP state
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const authUserId = user?.id ?? null;
+  
+  let dbUser = null;
+  let registration = null;
 
-  // In real app: query prisma.registration to check isRegistered
-  const isRegistered = false;
-  const isWaitlisted = false;
+  if (user) {
+    dbUser = await prisma.user.findUnique({ where: { authId: user.id } });
+    if (dbUser) {
+      registration = await prisma.registration.findUnique({
+        where: { userId_eventId: { userId: dbUser.id, eventId: event.id } },
+      });
+    }
+  }
+
+  const isRegistered = registration?.status === "APPROVED" || registration?.status === "ATTENDED";
+  const isWaitlisted = registration?.status === "WAITLISTED";
   const spotsLeft = event.capacity
     ? event.capacity - event._count.registrations
     : null;
   const { month, day } = formatEventDate(event.startAt);
 
   // QR token for the logged-in user (shown after RSVP in production)
-  const qrData = authUserId ? `${authUserId}:${event.id}` : null;
+  const qrData = dbUser ? `${dbUser.id}:${event.id}` : null;
 
   return (
     <div className="flex flex-col gap-8 max-w-3xl">
@@ -167,7 +153,7 @@ export default async function MemberEventDetailPage({
           ABOUT_THIS_EVENT
         </h2>
         <div className="prose prose-sm max-w-none">
-          {event.description.split("\n").map((line, i) =>
+          {(event.description ?? "").split("\n").map((line, i) =>
             line.trim() === "" ? (
               <br key={i} />
             ) : (

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CalendarDays, Search } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 import { EventCard } from "@/components/hive/event-card";
 
 export const metadata: Metadata = {
@@ -7,68 +8,20 @@ export const metadata: Metadata = {
   description: "Browse upcoming community events, workshops, and hackathons.",
 };
 
-// ─── Mock events — Phase 4: connected to Prisma after DB is live ─────────────
+export default async function MemberEventsPage() {
+  // STRICT RULE: Only fetch and display events where status === 'PUBLISHED'
+  const events = await prisma.event.findMany({
+    where: { status: "PUBLISHED" },
+    orderBy: { startAt: "asc" },
+    include: {
+      _count: {
+        select: {
+          registrations: { where: { status: { in: ["APPROVED", "ATTENDED"] } } },
+        },
+      },
+    },
+  });
 
-const mockEvents = [
-  {
-    id: "evt-001",
-    title: "Build Night: Web3 x AI",
-    slug: "build-night-web3-ai",
-    description:
-      "An evening of hacking, learning, and building at the intersection of Web3 and AI. Open to all skill levels.",
-    location: null,
-    isOnline: true,
-    startAt: new Date("2026-07-25T18:00:00"),
-    endAt: new Date("2026-07-25T21:00:00"),
-    status: "PUBLISHED",
-    capacity: 50,
-    _count: { registrations: 34 },
-  },
-  {
-    id: "evt-002",
-    title: "Open Source Sprint",
-    slug: "open-source-sprint",
-    description:
-      "Pick an open source project and contribute alongside fellow community members. All skill levels welcome — maintainers will be on hand to guide you.",
-    location: "Innovation Hub, Room 204",
-    isOnline: false,
-    startAt: new Date("2026-08-02T10:00:00"),
-    endAt: new Date("2026-08-02T17:00:00"),
-    status: "PUBLISHED",
-    capacity: 30,
-    _count: { registrations: 12 },
-  },
-  {
-    id: "evt-003",
-    title: "Monthly Community Call",
-    slug: "monthly-community-call",
-    description:
-      "Our monthly all-hands: community updates, shoutouts, upcoming events, and open floor discussion.",
-    location: null,
-    isOnline: true,
-    startAt: new Date("2026-08-05T19:00:00"),
-    endAt: new Date("2026-08-05T20:00:00"),
-    status: "PUBLISHED",
-    capacity: null,
-    _count: { registrations: 8 },
-  },
-  {
-    id: "evt-004",
-    title: "Figma to Code Workshop",
-    slug: "figma-to-code",
-    description:
-      "Hands-on session converting Figma designs to production-ready Next.js components.",
-    location: "Tech Campus, Lab A",
-    isOnline: false,
-    startAt: new Date("2026-08-12T14:00:00"),
-    endAt: new Date("2026-08-12T17:00:00"),
-    status: "PUBLISHED",
-    capacity: 20,
-    _count: { registrations: 19 },
-  },
-];
-
-export default function MemberEventsPage() {
   return (
     <div className="flex flex-col gap-8 max-w-3xl">
       {/* Header */}
@@ -83,11 +36,11 @@ export default function MemberEventsPage() {
           Upcoming Events
         </h2>
         <p className="text-sm" style={{ color: "var(--hive-muted)" }}>
-          {mockEvents.length} events scheduled — click to RSVP and see details.
+          {events.length} event{events.length !== 1 ? "s" : ""} scheduled — click to RSVP and see details.
         </p>
       </div>
 
-      {/* Search bar (UI only — Phase 5 will wire up) */}
+      {/* Search bar */}
       <div
         className="flex items-center gap-3 hive-input px-4 py-3"
       >
@@ -123,7 +76,7 @@ export default function MemberEventsPage() {
 
       {/* Events list */}
       <div className="flex flex-col gap-4">
-        {mockEvents.length === 0 ? (
+        {events.length === 0 ? (
           <div
             className="hive-card p-12 flex flex-col items-center gap-3"
             style={{ textAlign: "center" }}
@@ -133,11 +86,14 @@ export default function MemberEventsPage() {
               className="text-sm font-semibold"
               style={{ fontFamily: "var(--font-mono)", color: "var(--hive-muted)" }}
             >
-              NO_EVENTS_FOUND
+              NO_PUBLISHED_EVENTS_FOUND
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Check back soon for new community events!
             </p>
           </div>
         ) : (
-          mockEvents.map((event) => (
+          events.map((event) => (
             <EventCard key={event.id} event={event} />
           ))
         )}

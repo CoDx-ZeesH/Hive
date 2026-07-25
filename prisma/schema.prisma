@@ -22,15 +22,17 @@ enum UserRole {
 
 enum EventStatus {
   DRAFT
+  PENDING
   PUBLISHED
-  CANCELLED
+  REJECTED
   COMPLETED
 }
 
-enum RegistrationStatus {
-  REGISTERED
+enum RsvpStatus {
+  APPROVED
   WAITLISTED
   CANCELLED
+  ATTENDED
 }
 
 enum AttendanceStatus {
@@ -79,8 +81,8 @@ model User {
   portfolioUrl String?
 
   // Skills & Interests (stored as arrays for simplicity at MVP scale)
-  skills   String[]
-  interests String[]
+  skills   String[] @default([])
+  interests String[] @default([])
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -156,12 +158,13 @@ model Event {
   isOnline    Boolean     @default(false)
   meetLink    String?
 
-  status       EventStatus @default(DRAFT)
-  startAt      DateTime
-  endAt        DateTime
-  capacity     Int?
+  status          EventStatus @default(DRAFT)
+  startAt         DateTime
+  endAt           DateTime
+  capacity        Int?
+  rejectionReason String?
   // QR code token for attendance scanning
-  qrToken      String      @unique @default(uuid())
+  qrToken         String      @unique @default(uuid())
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -181,10 +184,10 @@ model Event {
 
 /// Member signs up for an event
 model Registration {
-  id      String             @id @default(uuid())
+  id      String     @id @default(uuid())
   userId  String
   eventId String
-  status  RegistrationStatus @default(REGISTERED)
+  status  RsvpStatus @default(APPROVED)
 
   registeredAt DateTime  @default(now())
   cancelledAt  DateTime?

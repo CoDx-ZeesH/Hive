@@ -9,7 +9,7 @@ import type { EventFormState } from "@/lib/validations/event";
  * EventForm — Client Component
  * Full create-event form with all fields, Zod validation, useActionState.
  */
-export function EventForm() {
+export function EventForm({ communities = [] }: { communities?: { id: string; name: string }[] }) {
   const router = useRouter();
   const [state, action, isPending] = useActionState<EventFormState, FormData>(
     createEventAction,
@@ -48,6 +48,25 @@ export function EventForm() {
           style={{ color: "var(--hive-text)" }}
         />
       </Field>
+
+      {/* Community */}
+      {communities.length > 0 && (
+        <Field label="COMMUNITY" id="communityId" required>
+          <select
+            id="communityId"
+            name="communityId"
+            required
+            defaultValue={communities[0]?.id || ""}
+            className="hive-input w-full px-4 py-3 text-sm bg-white"
+            style={{ color: "var(--hive-text)" }}
+          >
+            <option value="" disabled>Select a community</option>
+            {communities.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </Field>
+      )}
 
       {/* Description */}
       <Field label="DESCRIPTION" id="description" error={state?.errors?.description?.[0]}>
@@ -153,14 +172,14 @@ export function EventForm() {
         />
       </Field>
 
-      {/* Publish / Draft buttons */}
+      {/* Submit for approval / Draft buttons */}
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
           name="status"
-          value="PUBLISHED"
+          value="PENDING"
           disabled={isPending}
-          id="publish-event"
+          id="submit-approval"
           className="hive-btn flex-1 py-3.5 text-white text-sm"
           style={{
             background: "var(--hive-primary)",
@@ -168,7 +187,7 @@ export function EventForm() {
             cursor: isPending ? "not-allowed" : "pointer",
           }}
         >
-          {isPending ? "SAVING..." : "PUBLISH_EVENT"}
+          {isPending ? "SUBMITTING..." : "SUBMIT_FOR_APPROVAL"}
         </button>
         <button
           type="submit"
