@@ -426,6 +426,11 @@ export type CommunityScalarRelationFilter = {
   isNot?: Prisma.CommunityWhereInput
 }
 
+export type CommunityNullableScalarRelationFilter = {
+  is?: Prisma.CommunityWhereInput | null
+  isNot?: Prisma.CommunityWhereInput | null
+}
+
 export type CommunityCreateNestedOneWithoutMembershipsInput = {
   create?: Prisma.XOR<Prisma.CommunityCreateWithoutMembershipsInput, Prisma.CommunityUncheckedCreateWithoutMembershipsInput>
   connectOrCreate?: Prisma.CommunityCreateOrConnectWithoutMembershipsInput
@@ -446,10 +451,12 @@ export type CommunityCreateNestedOneWithoutEventsInput = {
   connect?: Prisma.CommunityWhereUniqueInput
 }
 
-export type CommunityUpdateOneRequiredWithoutEventsNestedInput = {
+export type CommunityUpdateOneWithoutEventsNestedInput = {
   create?: Prisma.XOR<Prisma.CommunityCreateWithoutEventsInput, Prisma.CommunityUncheckedCreateWithoutEventsInput>
   connectOrCreate?: Prisma.CommunityCreateOrConnectWithoutEventsInput
   upsert?: Prisma.CommunityUpsertWithoutEventsInput
+  disconnect?: Prisma.CommunityWhereInput | boolean
+  delete?: Prisma.CommunityWhereInput | boolean
   connect?: Prisma.CommunityWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.CommunityUpdateToOneWithWhereWithoutEventsInput, Prisma.CommunityUpdateWithoutEventsInput>, Prisma.CommunityUncheckedUpdateWithoutEventsInput>
 }

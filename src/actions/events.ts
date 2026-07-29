@@ -58,21 +58,10 @@ export async function createEventAction(
     return { message: "Only organizers and admins can create events." };
   }
 
-  // 3. Resolve communityId (use first membership if not provided, or first community)
-  let communityId = raw.communityId;
-  if (!communityId) {
-    const membership = await prisma.membership.findFirst({
-      where: { userId: organizer.id, status: "ACTIVE" },
-    });
-    if (membership) {
-      communityId = membership.communityId;
-    } else {
-      const anyCommunity = await prisma.community.findFirst();
-      if (!anyCommunity) {
-        return { message: "No active community found to assign this event." };
-      }
-      communityId = anyCommunity.id;
-    }
+  let finalCommunityId : string | undefined = undefined;
+  
+  if (raw.communityId && raw.communityId !== "global" && raw.communityId.trim() !== "") {
+    finalCommunityId = raw.communityId;
   }
 
   // 4. Generate slug
@@ -96,7 +85,7 @@ export async function createEventAction(
         endAt: new Date(validated.data.endAt),
         capacity: validated.data.capacity ?? null,
         status: validated.data.status,
-        communityId,
+        communityId: finalCommunityId, // <-- Now this will safely be null for global events!
         organizerId: organizer.id,
       },
     });
@@ -110,7 +99,6 @@ export async function createEventAction(
     return { message: "Failed to create event. Please try again." };
   }
 }
-
 /* ─── RSVP ────────────────────────────────────────────────────────────────── */
 
 export async function rsvpAction(eventId: string): Promise<{ success: boolean; message?: string }> {

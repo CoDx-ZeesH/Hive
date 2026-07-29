@@ -148,7 +148,7 @@ model Membership {
 
 model Event {
   id          String      @id @default(uuid())
-  communityId String
+  communityId String?
   organizerId String
   title       String
   slug        String      @unique
@@ -171,8 +171,8 @@ model Event {
   updatedAt DateTime @updatedAt
 
   // Relations
-  community     Community      @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  organizer     User           @relation("EventOrganizer", fields: [organizerId], references: [id])
+  community     Community?      @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  organizer     User?           @relation("EventOrganizer", fields: [organizerId], references: [id])
   registrations Registration[]
   attendance    Attendance[]
 

@@ -259,7 +259,7 @@ export type EventGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 
 export type EventGroupByOutputType = {
   id: string
-  communityId: string
+  communityId: string | null
   organizerId: string
   title: string
   slug: string
@@ -303,7 +303,7 @@ export type EventWhereInput = {
   OR?: Prisma.EventWhereInput[]
   NOT?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
   id?: Prisma.StringFilter<"Event"> | string
-  communityId?: Prisma.StringFilter<"Event"> | string
+  communityId?: Prisma.StringNullableFilter<"Event"> | string | null
   organizerId?: Prisma.StringFilter<"Event"> | string
   title?: Prisma.StringFilter<"Event"> | string
   slug?: Prisma.StringFilter<"Event"> | string
@@ -320,15 +320,15 @@ export type EventWhereInput = {
   qrToken?: Prisma.StringFilter<"Event"> | string
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
-  community?: Prisma.XOR<Prisma.CommunityScalarRelationFilter, Prisma.CommunityWhereInput>
-  organizer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  community?: Prisma.XOR<Prisma.CommunityNullableScalarRelationFilter, Prisma.CommunityWhereInput> | null
+  organizer?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   registrations?: Prisma.RegistrationListRelationFilter
   attendance?: Prisma.AttendanceListRelationFilter
 }
 
 export type EventOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  communityId?: Prisma.SortOrder
+  communityId?: Prisma.SortOrderInput | Prisma.SortOrder
   organizerId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
@@ -358,7 +358,7 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
   OR?: Prisma.EventWhereInput[]
   NOT?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
-  communityId?: Prisma.StringFilter<"Event"> | string
+  communityId?: Prisma.StringNullableFilter<"Event"> | string | null
   organizerId?: Prisma.StringFilter<"Event"> | string
   title?: Prisma.StringFilter<"Event"> | string
   description?: Prisma.StringNullableFilter<"Event"> | string | null
@@ -373,15 +373,15 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   rejectionReason?: Prisma.StringNullableFilter<"Event"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Event"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Event"> | Date | string
-  community?: Prisma.XOR<Prisma.CommunityScalarRelationFilter, Prisma.CommunityWhereInput>
-  organizer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  community?: Prisma.XOR<Prisma.CommunityNullableScalarRelationFilter, Prisma.CommunityWhereInput> | null
+  organizer?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   registrations?: Prisma.RegistrationListRelationFilter
   attendance?: Prisma.AttendanceListRelationFilter
 }, "id" | "slug" | "qrToken">
 
 export type EventOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  communityId?: Prisma.SortOrder
+  communityId?: Prisma.SortOrderInput | Prisma.SortOrder
   organizerId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
@@ -410,7 +410,7 @@ export type EventScalarWhereWithAggregatesInput = {
   OR?: Prisma.EventScalarWhereWithAggregatesInput[]
   NOT?: Prisma.EventScalarWhereWithAggregatesInput | Prisma.EventScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Event"> | string
-  communityId?: Prisma.StringWithAggregatesFilter<"Event"> | string
+  communityId?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
   organizerId?: Prisma.StringWithAggregatesFilter<"Event"> | string
   title?: Prisma.StringWithAggregatesFilter<"Event"> | string
   slug?: Prisma.StringWithAggregatesFilter<"Event"> | string
@@ -446,15 +446,15 @@ export type EventCreateInput = {
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  community: Prisma.CommunityCreateNestedOneWithoutEventsInput
-  organizer: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
+  community?: Prisma.CommunityCreateNestedOneWithoutEventsInput
+  organizer?: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutEventInput
   attendance?: Prisma.AttendanceCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   organizerId: string
   title: string
   slug: string
@@ -492,15 +492,15 @@ export type EventUpdateInput = {
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  community?: Prisma.CommunityUpdateOneRequiredWithoutEventsNestedInput
-  organizer?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
+  community?: Prisma.CommunityUpdateOneWithoutEventsNestedInput
+  organizer?: Prisma.UserUpdateOneWithoutCreatedEventsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutEventNestedInput
   attendance?: Prisma.AttendanceUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizerId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
@@ -523,7 +523,7 @@ export type EventUncheckedUpdateInput = {
 
 export type EventCreateManyInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   organizerId: string
   title: string
   slug: string
@@ -563,7 +563,7 @@ export type EventUpdateManyMutationInput = {
 
 export type EventUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizerId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
@@ -813,14 +813,14 @@ export type EventCreateWithoutOrganizerInput = {
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  community: Prisma.CommunityCreateNestedOneWithoutEventsInput
+  community?: Prisma.CommunityCreateNestedOneWithoutEventsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutEventInput
   attendance?: Prisma.AttendanceCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutOrganizerInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   title: string
   slug: string
   description?: string | null
@@ -871,7 +871,7 @@ export type EventScalarWhereInput = {
   OR?: Prisma.EventScalarWhereInput[]
   NOT?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
   id?: Prisma.StringFilter<"Event"> | string
-  communityId?: Prisma.StringFilter<"Event"> | string
+  communityId?: Prisma.StringNullableFilter<"Event"> | string | null
   organizerId?: Prisma.StringFilter<"Event"> | string
   title?: Prisma.StringFilter<"Event"> | string
   slug?: Prisma.StringFilter<"Event"> | string
@@ -907,7 +907,7 @@ export type EventCreateWithoutCommunityInput = {
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  organizer: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
+  organizer?: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutEventInput
   attendance?: Prisma.AttendanceCreateNestedManyWithoutEventInput
 }
@@ -977,14 +977,14 @@ export type EventCreateWithoutRegistrationsInput = {
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  community: Prisma.CommunityCreateNestedOneWithoutEventsInput
-  organizer: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
+  community?: Prisma.CommunityCreateNestedOneWithoutEventsInput
+  organizer?: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
   attendance?: Prisma.AttendanceCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutRegistrationsInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   organizerId: string
   title: string
   slug: string
@@ -1037,14 +1037,14 @@ export type EventUpdateWithoutRegistrationsInput = {
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  community?: Prisma.CommunityUpdateOneRequiredWithoutEventsNestedInput
-  organizer?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
+  community?: Prisma.CommunityUpdateOneWithoutEventsNestedInput
+  organizer?: Prisma.UserUpdateOneWithoutCreatedEventsNestedInput
   attendance?: Prisma.AttendanceUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutRegistrationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizerId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1081,14 +1081,14 @@ export type EventCreateWithoutAttendanceInput = {
   qrToken?: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  community: Prisma.CommunityCreateNestedOneWithoutEventsInput
-  organizer: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
+  community?: Prisma.CommunityCreateNestedOneWithoutEventsInput
+  organizer?: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutAttendanceInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   organizerId: string
   title: string
   slug: string
@@ -1141,14 +1141,14 @@ export type EventUpdateWithoutAttendanceInput = {
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  community?: Prisma.CommunityUpdateOneRequiredWithoutEventsNestedInput
-  organizer?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
+  community?: Prisma.CommunityUpdateOneWithoutEventsNestedInput
+  organizer?: Prisma.UserUpdateOneWithoutCreatedEventsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutAttendanceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   organizerId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1170,7 +1170,7 @@ export type EventUncheckedUpdateWithoutAttendanceInput = {
 
 export type EventCreateManyOrganizerInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   title: string
   slug: string
   description?: string | null
@@ -1205,14 +1205,14 @@ export type EventUpdateWithoutOrganizerInput = {
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  community?: Prisma.CommunityUpdateOneRequiredWithoutEventsNestedInput
+  community?: Prisma.CommunityUpdateOneWithoutEventsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutEventNestedInput
   attendance?: Prisma.AttendanceUpdateManyWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutOrganizerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1234,7 +1234,7 @@ export type EventUncheckedUpdateWithoutOrganizerInput = {
 
 export type EventUncheckedUpdateManyWithoutOrganizerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1289,7 +1289,7 @@ export type EventUpdateWithoutCommunityInput = {
   qrToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organizer?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
+  organizer?: Prisma.UserUpdateOneWithoutCreatedEventsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutEventNestedInput
   attendance?: Prisma.AttendanceUpdateManyWithoutEventNestedInput
 }
@@ -1395,8 +1395,8 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   qrToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
-  organizer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Event$communityArgs<ExtArgs>
+  organizer?: boolean | Prisma.Event$organizerArgs<ExtArgs>
   registrations?: boolean | Prisma.Event$registrationsArgs<ExtArgs>
   attendance?: boolean | Prisma.Event$attendanceArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
@@ -1421,8 +1421,8 @@ export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   qrToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
-  organizer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Event$communityArgs<ExtArgs>
+  organizer?: boolean | Prisma.Event$organizerArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1444,8 +1444,8 @@ export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   qrToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
-  organizer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Event$communityArgs<ExtArgs>
+  organizer?: boolean | Prisma.Event$organizerArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectScalar = {
@@ -1471,32 +1471,32 @@ export type EventSelectScalar = {
 
 export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "communityId" | "organizerId" | "title" | "slug" | "description" | "coverUrl" | "location" | "isOnline" | "meetLink" | "status" | "startAt" | "endAt" | "capacity" | "rejectionReason" | "qrToken" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
 export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
-  organizer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Event$communityArgs<ExtArgs>
+  organizer?: boolean | Prisma.Event$organizerArgs<ExtArgs>
   registrations?: boolean | Prisma.Event$registrationsArgs<ExtArgs>
   attendance?: boolean | Prisma.Event$attendanceArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
-  organizer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Event$communityArgs<ExtArgs>
+  organizer?: boolean | Prisma.Event$organizerArgs<ExtArgs>
 }
 export type EventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
-  organizer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Event$communityArgs<ExtArgs>
+  organizer?: boolean | Prisma.Event$organizerArgs<ExtArgs>
 }
 
 export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Event"
   objects: {
-    community: Prisma.$CommunityPayload<ExtArgs>
-    organizer: Prisma.$UserPayload<ExtArgs>
+    community: Prisma.$CommunityPayload<ExtArgs> | null
+    organizer: Prisma.$UserPayload<ExtArgs> | null
     registrations: Prisma.$RegistrationPayload<ExtArgs>[]
     attendance: Prisma.$AttendancePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    communityId: string
+    communityId: string | null
     organizerId: string
     title: string
     slug: string
@@ -1907,8 +1907,8 @@ readonly fields: EventFieldRefs;
  */
 export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  community<T extends Prisma.CommunityDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CommunityDefaultArgs<ExtArgs>>): Prisma.Prisma__CommunityClient<runtime.Types.Result.GetResult<Prisma.$CommunityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  organizer<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  community<T extends Prisma.Event$communityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$communityArgs<ExtArgs>>): Prisma.Prisma__CommunityClient<runtime.Types.Result.GetResult<Prisma.$CommunityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  organizer<T extends Prisma.Event$organizerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$organizerArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   registrations<T extends Prisma.Event$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attendance<T extends Prisma.Event$attendanceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$attendanceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -2356,6 +2356,44 @@ export type EventDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Limit how many Events to delete.
    */
   limit?: number
+}
+
+/**
+ * Event.community
+ */
+export type Event$communityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Community
+   */
+  select?: Prisma.CommunitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Community
+   */
+  omit?: Prisma.CommunityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunityInclude<ExtArgs> | null
+  where?: Prisma.CommunityWhereInput
+}
+
+/**
+ * Event.organizer
+ */
+export type Event$organizerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**
