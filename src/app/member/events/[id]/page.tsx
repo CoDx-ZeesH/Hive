@@ -107,7 +107,7 @@ export default async function MemberEventDetailPage({
             {event.title}
           </h1>
           <p className="text-sm mt-1" style={{ color: "var(--hive-muted)" }}>
-            Organized by {event.organizer.fullName}
+            Organized by {event.organizer?.fullName ?? "Hive"}
           </p>
         </div>
       </div>
