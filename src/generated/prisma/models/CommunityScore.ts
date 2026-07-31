@@ -200,7 +200,7 @@ export type CommunityScoreGroupByArgs<ExtArgs extends runtime.Types.Extensions.I
 export type CommunityScoreGroupByOutputType = {
   id: string
   userId: string
-  communityId: string
+  communityId: string | null
   action: string
   points: number
   refId: string | null
@@ -234,20 +234,20 @@ export type CommunityScoreWhereInput = {
   NOT?: Prisma.CommunityScoreWhereInput | Prisma.CommunityScoreWhereInput[]
   id?: Prisma.StringFilter<"CommunityScore"> | string
   userId?: Prisma.StringFilter<"CommunityScore"> | string
-  communityId?: Prisma.StringFilter<"CommunityScore"> | string
+  communityId?: Prisma.StringNullableFilter<"CommunityScore"> | string | null
   action?: Prisma.StringFilter<"CommunityScore"> | string
   points?: Prisma.IntFilter<"CommunityScore"> | number
   refId?: Prisma.StringNullableFilter<"CommunityScore"> | string | null
   note?: Prisma.StringNullableFilter<"CommunityScore"> | string | null
   createdAt?: Prisma.DateTimeFilter<"CommunityScore"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  community?: Prisma.XOR<Prisma.CommunityScalarRelationFilter, Prisma.CommunityWhereInput>
+  community?: Prisma.XOR<Prisma.CommunityNullableScalarRelationFilter, Prisma.CommunityWhereInput> | null
 }
 
 export type CommunityScoreOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  communityId?: Prisma.SortOrder
+  communityId?: Prisma.SortOrderInput | Prisma.SortOrder
   action?: Prisma.SortOrder
   points?: Prisma.SortOrder
   refId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -263,20 +263,20 @@ export type CommunityScoreWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.CommunityScoreWhereInput[]
   NOT?: Prisma.CommunityScoreWhereInput | Prisma.CommunityScoreWhereInput[]
   userId?: Prisma.StringFilter<"CommunityScore"> | string
-  communityId?: Prisma.StringFilter<"CommunityScore"> | string
+  communityId?: Prisma.StringNullableFilter<"CommunityScore"> | string | null
   action?: Prisma.StringFilter<"CommunityScore"> | string
   points?: Prisma.IntFilter<"CommunityScore"> | number
   refId?: Prisma.StringNullableFilter<"CommunityScore"> | string | null
   note?: Prisma.StringNullableFilter<"CommunityScore"> | string | null
   createdAt?: Prisma.DateTimeFilter<"CommunityScore"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  community?: Prisma.XOR<Prisma.CommunityScalarRelationFilter, Prisma.CommunityWhereInput>
+  community?: Prisma.XOR<Prisma.CommunityNullableScalarRelationFilter, Prisma.CommunityWhereInput> | null
 }, "id">
 
 export type CommunityScoreOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  communityId?: Prisma.SortOrder
+  communityId?: Prisma.SortOrderInput | Prisma.SortOrder
   action?: Prisma.SortOrder
   points?: Prisma.SortOrder
   refId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -295,7 +295,7 @@ export type CommunityScoreScalarWhereWithAggregatesInput = {
   NOT?: Prisma.CommunityScoreScalarWhereWithAggregatesInput | Prisma.CommunityScoreScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"CommunityScore"> | string
   userId?: Prisma.StringWithAggregatesFilter<"CommunityScore"> | string
-  communityId?: Prisma.StringWithAggregatesFilter<"CommunityScore"> | string
+  communityId?: Prisma.StringNullableWithAggregatesFilter<"CommunityScore"> | string | null
   action?: Prisma.StringWithAggregatesFilter<"CommunityScore"> | string
   points?: Prisma.IntWithAggregatesFilter<"CommunityScore"> | number
   refId?: Prisma.StringNullableWithAggregatesFilter<"CommunityScore"> | string | null
@@ -311,13 +311,13 @@ export type CommunityScoreCreateInput = {
   note?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCommunityScoresInput
-  community: Prisma.CommunityCreateNestedOneWithoutScoresInput
+  community?: Prisma.CommunityCreateNestedOneWithoutScoresInput
 }
 
 export type CommunityScoreUncheckedCreateInput = {
   id?: string
   userId: string
-  communityId: string
+  communityId?: string | null
   action: string
   points: number
   refId?: string | null
@@ -333,13 +333,13 @@ export type CommunityScoreUpdateInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCommunityScoresNestedInput
-  community?: Prisma.CommunityUpdateOneRequiredWithoutScoresNestedInput
+  community?: Prisma.CommunityUpdateOneWithoutScoresNestedInput
 }
 
 export type CommunityScoreUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   points?: Prisma.IntFieldUpdateOperationsInput | number
   refId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -350,7 +350,7 @@ export type CommunityScoreUncheckedUpdateInput = {
 export type CommunityScoreCreateManyInput = {
   id?: string
   userId: string
-  communityId: string
+  communityId?: string | null
   action: string
   points: number
   refId?: string | null
@@ -370,7 +370,7 @@ export type CommunityScoreUpdateManyMutationInput = {
 export type CommunityScoreUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   points?: Prisma.IntFieldUpdateOperationsInput | number
   refId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -528,12 +528,12 @@ export type CommunityScoreCreateWithoutUserInput = {
   refId?: string | null
   note?: string | null
   createdAt?: Date | string
-  community: Prisma.CommunityCreateNestedOneWithoutScoresInput
+  community?: Prisma.CommunityCreateNestedOneWithoutScoresInput
 }
 
 export type CommunityScoreUncheckedCreateWithoutUserInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   action: string
   points: number
   refId?: string | null
@@ -573,7 +573,7 @@ export type CommunityScoreScalarWhereInput = {
   NOT?: Prisma.CommunityScoreScalarWhereInput | Prisma.CommunityScoreScalarWhereInput[]
   id?: Prisma.StringFilter<"CommunityScore"> | string
   userId?: Prisma.StringFilter<"CommunityScore"> | string
-  communityId?: Prisma.StringFilter<"CommunityScore"> | string
+  communityId?: Prisma.StringNullableFilter<"CommunityScore"> | string | null
   action?: Prisma.StringFilter<"CommunityScore"> | string
   points?: Prisma.IntFilter<"CommunityScore"> | number
   refId?: Prisma.StringNullableFilter<"CommunityScore"> | string | null
@@ -629,7 +629,7 @@ export type CommunityScoreUpdateManyWithWhereWithoutCommunityInput = {
 
 export type CommunityScoreCreateManyUserInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   action: string
   points: number
   refId?: string | null
@@ -644,12 +644,12 @@ export type CommunityScoreUpdateWithoutUserInput = {
   refId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  community?: Prisma.CommunityUpdateOneRequiredWithoutScoresNestedInput
+  community?: Prisma.CommunityUpdateOneWithoutScoresNestedInput
 }
 
 export type CommunityScoreUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   points?: Prisma.IntFieldUpdateOperationsInput | number
   refId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -659,7 +659,7 @@ export type CommunityScoreUncheckedUpdateWithoutUserInput = {
 
 export type CommunityScoreUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   points?: Prisma.IntFieldUpdateOperationsInput | number
   refId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -719,7 +719,7 @@ export type CommunityScoreSelect<ExtArgs extends runtime.Types.Extensions.Intern
   note?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.CommunityScore$communityArgs<ExtArgs>
 }, ExtArgs["result"]["communityScore"]>
 
 export type CommunityScoreSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -732,7 +732,7 @@ export type CommunityScoreSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   note?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.CommunityScore$communityArgs<ExtArgs>
 }, ExtArgs["result"]["communityScore"]>
 
 export type CommunityScoreSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -745,7 +745,7 @@ export type CommunityScoreSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   note?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.CommunityScore$communityArgs<ExtArgs>
 }, ExtArgs["result"]["communityScore"]>
 
 export type CommunityScoreSelectScalar = {
@@ -762,27 +762,27 @@ export type CommunityScoreSelectScalar = {
 export type CommunityScoreOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "communityId" | "action" | "points" | "refId" | "note" | "createdAt", ExtArgs["result"]["communityScore"]>
 export type CommunityScoreInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.CommunityScore$communityArgs<ExtArgs>
 }
 export type CommunityScoreIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.CommunityScore$communityArgs<ExtArgs>
 }
 export type CommunityScoreIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.CommunityScore$communityArgs<ExtArgs>
 }
 
 export type $CommunityScorePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CommunityScore"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
-    community: Prisma.$CommunityPayload<ExtArgs>
+    community: Prisma.$CommunityPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
-    communityId: string
+    communityId: string | null
     action: string
     points: number
     refId: string | null
@@ -1183,7 +1183,7 @@ readonly fields: CommunityScoreFieldRefs;
 export interface Prisma__CommunityScoreClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  community<T extends Prisma.CommunityDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CommunityDefaultArgs<ExtArgs>>): Prisma.Prisma__CommunityClient<runtime.Types.Result.GetResult<Prisma.$CommunityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  community<T extends Prisma.CommunityScore$communityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CommunityScore$communityArgs<ExtArgs>>): Prisma.Prisma__CommunityClient<runtime.Types.Result.GetResult<Prisma.$CommunityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1619,6 +1619,25 @@ export type CommunityScoreDeleteManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many CommunityScores to delete.
    */
   limit?: number
+}
+
+/**
+ * CommunityScore.community
+ */
+export type CommunityScore$communityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Community
+   */
+  select?: Prisma.CommunitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Community
+   */
+  omit?: Prisma.CommunityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunityInclude<ExtArgs> | null
+  where?: Prisma.CommunityWhereInput
 }
 
 /**

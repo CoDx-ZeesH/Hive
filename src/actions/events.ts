@@ -154,7 +154,7 @@ export async function rsvpAction(eventId: string): Promise<{ success: boolean; m
     await prisma.communityScore.create({
       data: {
         userId: user.id,
-        communityId: event.communityId,
+        communityId: event.communityId || undefined,
         action: "ATTEND_EVENT",
         points: 10,
         refId: eventId,
@@ -375,7 +375,7 @@ export async function completeEventAction(eventId: string): Promise<{ success: b
     const existingScore = await prisma.communityScore.findFirst({
       where: {
         userId: reg.userId,
-        communityId: event.communityId,
+        communityId: event.communityId || undefined,
         action: "ATTEND_EVENT",
         refId: eventId,
       },
@@ -385,7 +385,7 @@ export async function completeEventAction(eventId: string): Promise<{ success: b
       await prisma.communityScore.create({
         data: {
           userId: reg.userId,
-          communityId: event.communityId,
+          communityId: event.communityId || undefined,
           action: "ATTEND_EVENT",
           points: POINTS_PER_ATTENDANCE,
           refId: eventId,

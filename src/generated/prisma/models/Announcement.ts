@@ -167,7 +167,7 @@ export type AnnouncementGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 
 export type AnnouncementGroupByOutputType = {
   id: string
-  communityId: string
+  communityId: string | null
   authorId: string
   title: string
   content: string
@@ -199,20 +199,20 @@ export type AnnouncementWhereInput = {
   OR?: Prisma.AnnouncementWhereInput[]
   NOT?: Prisma.AnnouncementWhereInput | Prisma.AnnouncementWhereInput[]
   id?: Prisma.StringFilter<"Announcement"> | string
-  communityId?: Prisma.StringFilter<"Announcement"> | string
+  communityId?: Prisma.StringNullableFilter<"Announcement"> | string | null
   authorId?: Prisma.StringFilter<"Announcement"> | string
   title?: Prisma.StringFilter<"Announcement"> | string
   content?: Prisma.StringFilter<"Announcement"> | string
   isPinned?: Prisma.BoolFilter<"Announcement"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
-  community?: Prisma.XOR<Prisma.CommunityScalarRelationFilter, Prisma.CommunityWhereInput>
+  community?: Prisma.XOR<Prisma.CommunityNullableScalarRelationFilter, Prisma.CommunityWhereInput> | null
   author?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type AnnouncementOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  communityId?: Prisma.SortOrder
+  communityId?: Prisma.SortOrderInput | Prisma.SortOrder
   authorId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
@@ -228,20 +228,20 @@ export type AnnouncementWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.AnnouncementWhereInput | Prisma.AnnouncementWhereInput[]
   OR?: Prisma.AnnouncementWhereInput[]
   NOT?: Prisma.AnnouncementWhereInput | Prisma.AnnouncementWhereInput[]
-  communityId?: Prisma.StringFilter<"Announcement"> | string
+  communityId?: Prisma.StringNullableFilter<"Announcement"> | string | null
   authorId?: Prisma.StringFilter<"Announcement"> | string
   title?: Prisma.StringFilter<"Announcement"> | string
   content?: Prisma.StringFilter<"Announcement"> | string
   isPinned?: Prisma.BoolFilter<"Announcement"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
-  community?: Prisma.XOR<Prisma.CommunityScalarRelationFilter, Prisma.CommunityWhereInput>
+  community?: Prisma.XOR<Prisma.CommunityNullableScalarRelationFilter, Prisma.CommunityWhereInput> | null
   author?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
 export type AnnouncementOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  communityId?: Prisma.SortOrder
+  communityId?: Prisma.SortOrderInput | Prisma.SortOrder
   authorId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
@@ -258,7 +258,7 @@ export type AnnouncementScalarWhereWithAggregatesInput = {
   OR?: Prisma.AnnouncementScalarWhereWithAggregatesInput[]
   NOT?: Prisma.AnnouncementScalarWhereWithAggregatesInput | Prisma.AnnouncementScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Announcement"> | string
-  communityId?: Prisma.StringWithAggregatesFilter<"Announcement"> | string
+  communityId?: Prisma.StringNullableWithAggregatesFilter<"Announcement"> | string | null
   authorId?: Prisma.StringWithAggregatesFilter<"Announcement"> | string
   title?: Prisma.StringWithAggregatesFilter<"Announcement"> | string
   content?: Prisma.StringWithAggregatesFilter<"Announcement"> | string
@@ -274,13 +274,13 @@ export type AnnouncementCreateInput = {
   isPinned?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  community: Prisma.CommunityCreateNestedOneWithoutAnnouncementsInput
+  community?: Prisma.CommunityCreateNestedOneWithoutAnnouncementsInput
   author: Prisma.UserCreateNestedOneWithoutAnnouncementsInput
 }
 
 export type AnnouncementUncheckedCreateInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   authorId: string
   title: string
   content: string
@@ -296,13 +296,13 @@ export type AnnouncementUpdateInput = {
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  community?: Prisma.CommunityUpdateOneRequiredWithoutAnnouncementsNestedInput
+  community?: Prisma.CommunityUpdateOneWithoutAnnouncementsNestedInput
   author?: Prisma.UserUpdateOneRequiredWithoutAnnouncementsNestedInput
 }
 
 export type AnnouncementUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
@@ -313,7 +313,7 @@ export type AnnouncementUncheckedUpdateInput = {
 
 export type AnnouncementCreateManyInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   authorId: string
   title: string
   content: string
@@ -333,7 +333,7 @@ export type AnnouncementUpdateManyMutationInput = {
 
 export type AnnouncementUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
@@ -476,12 +476,12 @@ export type AnnouncementCreateWithoutAuthorInput = {
   isPinned?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  community: Prisma.CommunityCreateNestedOneWithoutAnnouncementsInput
+  community?: Prisma.CommunityCreateNestedOneWithoutAnnouncementsInput
 }
 
 export type AnnouncementUncheckedCreateWithoutAuthorInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   title: string
   content: string
   isPinned?: boolean
@@ -520,7 +520,7 @@ export type AnnouncementScalarWhereInput = {
   OR?: Prisma.AnnouncementScalarWhereInput[]
   NOT?: Prisma.AnnouncementScalarWhereInput | Prisma.AnnouncementScalarWhereInput[]
   id?: Prisma.StringFilter<"Announcement"> | string
-  communityId?: Prisma.StringFilter<"Announcement"> | string
+  communityId?: Prisma.StringNullableFilter<"Announcement"> | string | null
   authorId?: Prisma.StringFilter<"Announcement"> | string
   title?: Prisma.StringFilter<"Announcement"> | string
   content?: Prisma.StringFilter<"Announcement"> | string
@@ -577,7 +577,7 @@ export type AnnouncementUpdateManyWithWhereWithoutCommunityInput = {
 
 export type AnnouncementCreateManyAuthorInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   title: string
   content: string
   isPinned?: boolean
@@ -592,12 +592,12 @@ export type AnnouncementUpdateWithoutAuthorInput = {
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  community?: Prisma.CommunityUpdateOneRequiredWithoutAnnouncementsNestedInput
+  community?: Prisma.CommunityUpdateOneWithoutAnnouncementsNestedInput
 }
 
 export type AnnouncementUncheckedUpdateWithoutAuthorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -607,7 +607,7 @@ export type AnnouncementUncheckedUpdateWithoutAuthorInput = {
 
 export type AnnouncementUncheckedUpdateManyWithoutAuthorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -666,7 +666,7 @@ export type AnnouncementSelect<ExtArgs extends runtime.Types.Extensions.Internal
   isPinned?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Announcement$communityArgs<ExtArgs>
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["announcement"]>
 
@@ -679,7 +679,7 @@ export type AnnouncementSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   isPinned?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Announcement$communityArgs<ExtArgs>
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["announcement"]>
 
@@ -692,7 +692,7 @@ export type AnnouncementSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   isPinned?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Announcement$communityArgs<ExtArgs>
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["announcement"]>
 
@@ -709,27 +709,27 @@ export type AnnouncementSelectScalar = {
 
 export type AnnouncementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "communityId" | "authorId" | "title" | "content" | "isPinned" | "createdAt" | "updatedAt", ExtArgs["result"]["announcement"]>
 export type AnnouncementInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Announcement$communityArgs<ExtArgs>
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type AnnouncementIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Announcement$communityArgs<ExtArgs>
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type AnnouncementIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Announcement$communityArgs<ExtArgs>
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $AnnouncementPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Announcement"
   objects: {
-    community: Prisma.$CommunityPayload<ExtArgs>
+    community: Prisma.$CommunityPayload<ExtArgs> | null
     author: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    communityId: string
+    communityId: string | null
     authorId: string
     title: string
     content: string
@@ -1130,7 +1130,7 @@ readonly fields: AnnouncementFieldRefs;
  */
 export interface Prisma__AnnouncementClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  community<T extends Prisma.CommunityDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CommunityDefaultArgs<ExtArgs>>): Prisma.Prisma__CommunityClient<runtime.Types.Result.GetResult<Prisma.$CommunityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  community<T extends Prisma.Announcement$communityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Announcement$communityArgs<ExtArgs>>): Prisma.Prisma__CommunityClient<runtime.Types.Result.GetResult<Prisma.$CommunityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   author<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1567,6 +1567,25 @@ export type AnnouncementDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many Announcements to delete.
    */
   limit?: number
+}
+
+/**
+ * Announcement.community
+ */
+export type Announcement$communityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Community
+   */
+  select?: Prisma.CommunitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Community
+   */
+  omit?: Prisma.CommunityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunityInclude<ExtArgs> | null
+  where?: Prisma.CommunityWhereInput
 }
 
 /**

@@ -162,7 +162,7 @@ export type MembershipGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 export type MembershipGroupByOutputType = {
   id: string
   userId: string
-  communityId: string
+  communityId: string | null
   role: $Enums.UserRole
   status: $Enums.MembershipStatus
   joinedAt: Date
@@ -193,19 +193,19 @@ export type MembershipWhereInput = {
   NOT?: Prisma.MembershipWhereInput | Prisma.MembershipWhereInput[]
   id?: Prisma.StringFilter<"Membership"> | string
   userId?: Prisma.StringFilter<"Membership"> | string
-  communityId?: Prisma.StringFilter<"Membership"> | string
+  communityId?: Prisma.StringNullableFilter<"Membership"> | string | null
   role?: Prisma.EnumUserRoleFilter<"Membership"> | $Enums.UserRole
   status?: Prisma.EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
   joinedAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  community?: Prisma.XOR<Prisma.CommunityScalarRelationFilter, Prisma.CommunityWhereInput>
+  community?: Prisma.XOR<Prisma.CommunityNullableScalarRelationFilter, Prisma.CommunityWhereInput> | null
 }
 
 export type MembershipOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  communityId?: Prisma.SortOrder
+  communityId?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   status?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
@@ -221,19 +221,19 @@ export type MembershipWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.MembershipWhereInput[]
   NOT?: Prisma.MembershipWhereInput | Prisma.MembershipWhereInput[]
   userId?: Prisma.StringFilter<"Membership"> | string
-  communityId?: Prisma.StringFilter<"Membership"> | string
+  communityId?: Prisma.StringNullableFilter<"Membership"> | string | null
   role?: Prisma.EnumUserRoleFilter<"Membership"> | $Enums.UserRole
   status?: Prisma.EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
   joinedAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  community?: Prisma.XOR<Prisma.CommunityScalarRelationFilter, Prisma.CommunityWhereInput>
+  community?: Prisma.XOR<Prisma.CommunityNullableScalarRelationFilter, Prisma.CommunityWhereInput> | null
 }, "id" | "userId_communityId">
 
 export type MembershipOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  communityId?: Prisma.SortOrder
+  communityId?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   status?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
@@ -249,7 +249,7 @@ export type MembershipScalarWhereWithAggregatesInput = {
   NOT?: Prisma.MembershipScalarWhereWithAggregatesInput | Prisma.MembershipScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Membership"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Membership"> | string
-  communityId?: Prisma.StringWithAggregatesFilter<"Membership"> | string
+  communityId?: Prisma.StringNullableWithAggregatesFilter<"Membership"> | string | null
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"Membership"> | $Enums.UserRole
   status?: Prisma.EnumMembershipStatusWithAggregatesFilter<"Membership"> | $Enums.MembershipStatus
   joinedAt?: Prisma.DateTimeWithAggregatesFilter<"Membership"> | Date | string
@@ -263,13 +263,13 @@ export type MembershipCreateInput = {
   joinedAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMembershipsInput
-  community: Prisma.CommunityCreateNestedOneWithoutMembershipsInput
+  community?: Prisma.CommunityCreateNestedOneWithoutMembershipsInput
 }
 
 export type MembershipUncheckedCreateInput = {
   id?: string
   userId: string
-  communityId: string
+  communityId?: string | null
   role?: $Enums.UserRole
   status?: $Enums.MembershipStatus
   joinedAt?: Date | string
@@ -283,13 +283,13 @@ export type MembershipUpdateInput = {
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
-  community?: Prisma.CommunityUpdateOneRequiredWithoutMembershipsNestedInput
+  community?: Prisma.CommunityUpdateOneWithoutMembershipsNestedInput
 }
 
 export type MembershipUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -299,7 +299,7 @@ export type MembershipUncheckedUpdateInput = {
 export type MembershipCreateManyInput = {
   id?: string
   userId: string
-  communityId: string
+  communityId?: string | null
   role?: $Enums.UserRole
   status?: $Enums.MembershipStatus
   joinedAt?: Date | string
@@ -317,7 +317,7 @@ export type MembershipUpdateManyMutationInput = {
 export type MembershipUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -463,12 +463,12 @@ export type MembershipCreateWithoutUserInput = {
   status?: $Enums.MembershipStatus
   joinedAt?: Date | string
   updatedAt?: Date | string
-  community: Prisma.CommunityCreateNestedOneWithoutMembershipsInput
+  community?: Prisma.CommunityCreateNestedOneWithoutMembershipsInput
 }
 
 export type MembershipUncheckedCreateWithoutUserInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   role?: $Enums.UserRole
   status?: $Enums.MembershipStatus
   joinedAt?: Date | string
@@ -507,7 +507,7 @@ export type MembershipScalarWhereInput = {
   NOT?: Prisma.MembershipScalarWhereInput | Prisma.MembershipScalarWhereInput[]
   id?: Prisma.StringFilter<"Membership"> | string
   userId?: Prisma.StringFilter<"Membership"> | string
-  communityId?: Prisma.StringFilter<"Membership"> | string
+  communityId?: Prisma.StringNullableFilter<"Membership"> | string | null
   role?: Prisma.EnumUserRoleFilter<"Membership"> | $Enums.UserRole
   status?: Prisma.EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
   joinedAt?: Prisma.DateTimeFilter<"Membership"> | Date | string
@@ -560,7 +560,7 @@ export type MembershipUpdateManyWithWhereWithoutCommunityInput = {
 
 export type MembershipCreateManyUserInput = {
   id?: string
-  communityId: string
+  communityId?: string | null
   role?: $Enums.UserRole
   status?: $Enums.MembershipStatus
   joinedAt?: Date | string
@@ -573,12 +573,12 @@ export type MembershipUpdateWithoutUserInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  community?: Prisma.CommunityUpdateOneRequiredWithoutMembershipsNestedInput
+  community?: Prisma.CommunityUpdateOneWithoutMembershipsNestedInput
 }
 
 export type MembershipUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -587,7 +587,7 @@ export type MembershipUncheckedUpdateWithoutUserInput = {
 
 export type MembershipUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  communityId?: Prisma.StringFieldUpdateOperationsInput | string
+  communityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -641,7 +641,7 @@ export type MembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   joinedAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Membership$communityArgs<ExtArgs>
 }, ExtArgs["result"]["membership"]>
 
 export type MembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -653,7 +653,7 @@ export type MembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   joinedAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Membership$communityArgs<ExtArgs>
 }, ExtArgs["result"]["membership"]>
 
 export type MembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -665,7 +665,7 @@ export type MembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   joinedAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Membership$communityArgs<ExtArgs>
 }, ExtArgs["result"]["membership"]>
 
 export type MembershipSelectScalar = {
@@ -681,27 +681,27 @@ export type MembershipSelectScalar = {
 export type MembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "communityId" | "role" | "status" | "joinedAt" | "updatedAt", ExtArgs["result"]["membership"]>
 export type MembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Membership$communityArgs<ExtArgs>
 }
 export type MembershipIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Membership$communityArgs<ExtArgs>
 }
 export type MembershipIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  community?: boolean | Prisma.CommunityDefaultArgs<ExtArgs>
+  community?: boolean | Prisma.Membership$communityArgs<ExtArgs>
 }
 
 export type $MembershipPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Membership"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
-    community: Prisma.$CommunityPayload<ExtArgs>
+    community: Prisma.$CommunityPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
-    communityId: string
+    communityId: string | null
     role: $Enums.UserRole
     status: $Enums.MembershipStatus
     joinedAt: Date
@@ -1101,7 +1101,7 @@ readonly fields: MembershipFieldRefs;
 export interface Prisma__MembershipClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  community<T extends Prisma.CommunityDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CommunityDefaultArgs<ExtArgs>>): Prisma.Prisma__CommunityClient<runtime.Types.Result.GetResult<Prisma.$CommunityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  community<T extends Prisma.Membership$communityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$communityArgs<ExtArgs>>): Prisma.Prisma__CommunityClient<runtime.Types.Result.GetResult<Prisma.$CommunityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1536,6 +1536,25 @@ export type MembershipDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many Memberships to delete.
    */
   limit?: number
+}
+
+/**
+ * Membership.community
+ */
+export type Membership$communityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Community
+   */
+  select?: Prisma.CommunitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Community
+   */
+  omit?: Prisma.CommunityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunityInclude<ExtArgs> | null
+  where?: Prisma.CommunityWhereInput
 }
 
 /**

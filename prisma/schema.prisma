@@ -11,7 +11,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 enum UserRole {
@@ -81,7 +80,7 @@ model User {
   portfolioUrl String?
 
   // Skills & Interests (stored as arrays for simplicity at MVP scale)
-  skills   String[] @default([])
+  skills    String[] @default([])
   interests String[] @default([])
 
   // Timestamps
@@ -90,7 +89,7 @@ model User {
 
   // Relations
   memberships        Membership[]
-  createdEvents      Event[]             @relation("EventOrganizer")
+  createdEvents      Event[]            @relation("EventOrganizer")
   registrations      Registration[]
   attendanceRecords  Attendance[]
   communityScores    CommunityScore[]
@@ -130,14 +129,15 @@ model Community {
 model Membership {
   id          String           @id @default(uuid())
   userId      String
-  communityId String
+  communityId String?
   role        UserRole         @default(MEMBER)
   status      MembershipStatus @default(ACTIVE)
   joinedAt    DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // FIX: Added '?' to Community to match communityId String?
+  community Community? @relation(fields: [communityId], references: [id], onDelete: Cascade)
 
   @@unique([userId, communityId])
   @@index([communityId])
@@ -171,8 +171,8 @@ model Event {
   updatedAt DateTime @updatedAt
 
   // Relations
-  community     Community?      @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  organizer     User?           @relation("EventOrganizer", fields: [organizerId], references: [id])
+  community    Community?   @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  organizer    User?        @relation("EventOrganizer", fields: [organizerId], references: [id])
   registrations Registration[]
   attendance    Attendance[]
 
@@ -202,11 +202,11 @@ model Registration {
 
 /// Attendance record after QR scan at the event door
 model Attendance {
-  id      String           @id @default(uuid())
-  userId  String
-  eventId String
-  status  AttendanceStatus @default(PRESENT)
-  scannedAt DateTime       @default(now())
+  id        String           @id @default(uuid())
+  userId    String
+  eventId   String
+  status    AttendanceStatus @default(PRESENT)
+  scannedAt DateTime         @default(now())
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -222,7 +222,7 @@ model Attendance {
 model CommunityScore {
   id          String  @id @default(uuid())
   userId      String
-  communityId String
+  communityId String?
   action      String  // e.g. "ATTEND_EVENT", "HOST_SESSION", etc.
   points      Int
   refId       String? // Optional reference ID (eventId, opportunityId, etc.)
@@ -230,8 +230,9 @@ model CommunityScore {
 
   createdAt DateTime @default(now())
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // FIX: Added '?' to Community to match communityId String?
+  community Community? @relation(fields: [communityId], references: [id], onDelete: Cascade)
 
   @@index([userId, communityId])
   @@map("community_scores")
@@ -271,7 +272,8 @@ model UserBadge {
 
 model Announcement {
   id          String  @id @default(uuid())
-  communityId String
+  // FIX: Made this optional so you can post global announcements
+  communityId String? 
   authorId    String
   title       String
   content     String
@@ -280,8 +282,9 @@ model Announcement {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  author    User      @relation(fields: [authorId], references: [id])
+  // FIX: Added '?' to Community to match communityId String?
+  community Community? @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  author    User       @relation(fields: [authorId], references: [id])
 
   @@index([communityId])
   @@map("announcements")
