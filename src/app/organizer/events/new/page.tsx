@@ -71,7 +71,7 @@ export default async function CreateEventPage() {
         className="bg-white border rounded-2xl p-8"
         style={{ borderColor: "var(--hive-border)", boxShadow: "var(--shadow-md)" }}
       >
-        <EventForm communities={allCommunities.map(c => ({ id: c.id, name: c.name }))} />
+        <EventForm communities={allCommunities.map(c => ({ id: c?.id ?? "101", name: c?.name ?? "Hive" }))} />
       </div>
     </div>
   );
